@@ -1,0 +1,56 @@
+<section class="history">
+  <div class="history__header app-card">
+    <div>
+      <span class="page-kicker">
+        <i class="pi pi-chart-line"></i>
+        Progresso
+      </span>
+      <h1 class="page-title">Tentativas e desempenho</h1>
+      <p class="page-subtitle">
+        Revise scores, continue provas abertas e limpe o banco local quando quiser começar do zero.
+      </p>
+    </div>
+    <p-button
+      icon="pi pi-trash"
+      label="Limpar progresso"
+      severity="danger"
+      [outlined]="true"
+      (onClick)="resetProgress()"
+    />
+  </div>
+
+  <div class="history-list app-card">
+    @for (attempt of progress()?.attempts || []; track attempt.id) {
+      <button type="button" class="history-row" (click)="openAttempt(attempt)">
+        <div class="history-row__main">
+          <strong>{{ modeLabel(attempt) }}</strong>
+          <span>{{ attempt.themeName || 'Tema removido' }}</span>
+          <span>{{ attempt.startedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+
+        <div class="history-row__progress">
+          <span>{{ attempt.answeredCount }} / {{ attempt.questionCount }} respostas</span>
+          <p-progressBar
+            [value]="(attempt.answeredCount / attempt.questionCount) * 100"
+            [showValue]="false"
+          />
+        </div>
+
+        @if (attempt.status === 'finished') {
+          <p-tag
+            [value]="attempt.score + '%'"
+            [severity]="scoreSeverity(attempt.score)"
+          />
+        } @else {
+          <p-tag value="Em andamento" severity="info" />
+        }
+      </button>
+    } @empty {
+      <div class="empty-state">
+        <i class="pi pi-history"></i>
+        <strong>Nenhuma tentativa ainda</strong>
+        <span>Inicie um bloco ou prova completa para alimentar este histórico.</span>
+      </div>
+    }
+  </div>
+</section>

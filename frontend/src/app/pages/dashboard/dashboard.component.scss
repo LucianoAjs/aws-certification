@@ -1,0 +1,243 @@
+.dashboard {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.dashboard__intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-panel);
+  box-shadow: var(--app-shadow);
+}
+
+.dashboard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.theme-switcher > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.theme-switcher strong {
+  overflow-wrap: anywhere;
+}
+
+.theme-switcher span {
+  color: var(--app-text-muted);
+}
+
+.theme-switcher__label {
+  color: var(--app-orange-dark) !important;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.theme-switcher__controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.theme-switcher select {
+  min-width: min(360px, 100%);
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  color: var(--app-text);
+  background: #fff;
+}
+
+.metric {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  min-height: 116px;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.metric strong {
+  color: var(--app-text);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.metric__label {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.metric i {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  color: var(--app-blue);
+  font-size: 1.4rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 1rem;
+}
+
+.panel {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel__header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.panel-link {
+  color: var(--app-blue);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.block-list,
+.attempt-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.block-row,
+.attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-panel-soft);
+}
+
+.block-row__number {
+  display: grid;
+  flex: 0 0 2.4rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border-radius: 8px;
+  color: #111827;
+  background: var(--app-orange);
+  font-weight: 900;
+}
+
+.block-row__content {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.block-row__content span,
+.attempt-row small {
+  color: var(--app-text-muted);
+}
+
+.attempt-row {
+  width: 100%;
+  justify-content: space-between;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attempt-row:hover {
+  border-color: var(--app-blue);
+}
+
+.attempt-row span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.empty-state {
+  display: grid;
+  gap: 0.5rem;
+  place-items: center;
+  min-height: 180px;
+  color: var(--app-text-muted);
+  border: 1px dashed var(--app-border-strong);
+  border-radius: var(--app-radius);
+}
+
+.empty-state i {
+  color: var(--app-orange-dark);
+  font-size: 1.8rem;
+}
+
+@media (max-width: 1020px) {
+  .metrics,
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard__intro,
+  .theme-switcher,
+  .block-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard__actions {
+    justify-content: stretch;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,18 @@
+<div class="app-shell">
+  <app-toolbar (menuToggle)="onToggleSidebar()" />
+
+  <div
+    class="app-shell__body"
+    [class.is-collapsed]="isSidebarCollapsed && !isNarrowShell()"
+  >
+    <app-sidebar
+      [isMobile]="isNarrowShell()"
+      [isSidebarCollapsed]="isSidebarCollapsed"
+      (closeRequested)="onSidebarOverlayClose()"
+    />
+
+    <main class="app-shell__main">
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -1,0 +1,238 @@
+<section class="exam-page">
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (!attempt()) {
+    <div class="setup app-card">
+      <div>
+        <span class="page-kicker">
+          <i class="pi pi-stopwatch"></i>
+          Simulado AWS
+        </span>
+        <h1 class="page-title">Escolha o modo de treino</h1>
+        <p class="page-subtitle">
+          A tentativa fica salva localmente. O gabarito aparece somente depois de finalizar, como em um fluxo de prova.
+        </p>
+      </div>
+
+      <div class="theme-select">
+        <label for="exam-theme">Tema do simulado</label>
+        <select
+          id="exam-theme"
+          [value]="selectedThemeId() || ''"
+          (change)="selectTheme($any($event.target).value)"
+        >
+          @for (theme of themes(); track theme.id) {
+            <option [value]="theme.id">
+              {{ theme.name }} · {{ theme.questionCount }} questões
+            </option>
+          }
+        </select>
+        <span>{{ selectedTheme()?.description || 'Escolha o conjunto de perguntas para treinar.' }}</span>
+      </div>
+
+      <div class="mode-grid">
+        <button
+          type="button"
+          class="mode-card"
+          [class.is-selected]="selectedMode() === 'full'"
+          (click)="selectMode('full')"
+        >
+          <i class="pi pi-globe"></i>
+          <strong>Prova completa</strong>
+          <span>{{ exam()?.totalQuestions || 0 }} questões · {{ exam()?.fullExamTimeLimitMinutes || 0 }} min</span>
+        </button>
+
+        <button
+          type="button"
+          class="mode-card"
+          [class.is-selected]="selectedMode() === 'block'"
+          (click)="selectMode('block')"
+        >
+          <i class="pi pi-th-large"></i>
+          <strong>Bloco cronometrado</strong>
+          <span>{{ exam()?.blocks?.[0]?.questionCount || 0 }} questões por bloco</span>
+        </button>
+      </div>
+
+      @if (selectedMode() === 'block') {
+        <div class="block-picker">
+          @for (block of exam()?.blocks || []; track block.number) {
+            <button
+              type="button"
+              [class.is-selected]="selectedBlockNumber() === block.number"
+              (click)="selectBlock(block.number)"
+            >
+              <strong>Bloco {{ block.number }}</strong>
+              <span>{{ block.title }}</span>
+            </button>
+          }
+        </div>
+      }
+
+      <div class="setup__footer">
+        <p-button
+          icon="pi pi-play"
+          label="Iniciar tentativa"
+          [loading]="loading()"
+          [disabled]="!exam()?.totalQuestions"
+          (onClick)="startAttempt()"
+        />
+      </div>
+    </div>
+  } @else {
+    @if (attempt(); as attemptState) {
+      <div class="exam-top app-card">
+        <div>
+          <span class="page-kicker">
+            <i class="pi pi-shield"></i>
+            {{ attemptState.mode === 'full' ? 'Prova completa' : 'Bloco ' + attemptState.blockNumber }}
+          </span>
+          <h1 class="page-title">
+            {{ attemptState.status === 'finished' ? 'Revisão do simulado' : 'Simulado em andamento' }}
+          </h1>
+          <p class="exam-theme-name">{{ attemptState.themeName }}</p>
+        </div>
+
+        <div class="exam-top__stats">
+          @if (attemptState.status === 'in_progress') {
+            <div class="timer" [class.timer--low]="(timeRemainingSeconds() ?? 9999) < 300">
+              <i class="pi pi-clock"></i>
+              {{ formatSeconds(timeRemainingSeconds()) }}
+            </div>
+          } @else {
+            <div class="timer timer--done">
+              <i class="pi pi-check-circle"></i>
+              Finalizada
+            </div>
+          }
+          @if (attemptState.status === 'finished') {
+            <p-tag
+              [value]="attemptState.score + '%'"
+              [severity]="scoreSeverity(attemptState.score)"
+            />
+          }
+          <p-button
+            icon="pi pi-plus"
+            label="Nova tentativa"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="newAttempt()"
+          />
+          @if (attemptState.status === 'in_progress') {
+            <p-button
+              icon="pi pi-check-circle"
+              label="Finalizar"
+              severity="warn"
+              (onClick)="finishAttempt()"
+            />
+          }
+        </div>
+      </div>
+
+      <div class="progress-strip app-card">
+        <span>{{ attemptState.answeredCount }} de {{ attemptState.questionCount }} respondidas</span>
+        <p-progressBar [value]="answeredPercent()" [showValue]="false" />
+        <strong>{{ answeredPercent() }}%</strong>
+      </div>
+
+      <div class="exam-layout">
+        <aside class="question-map app-card">
+          <h2 class="app-section-title">Questões</h2>
+          <div class="question-map__grid">
+            @for (question of attemptState.questions; track question.id; let index = $index) {
+              <button
+                type="button"
+                [class]="'question-dot question-dot--' + questionStatus(question, index)"
+                (click)="goToQuestion(index)"
+              >
+                {{ index + 1 }}
+              </button>
+            }
+          </div>
+          <div class="legend">
+            <span><i class="legend__box legend__box--answered"></i> Respondida</span>
+            <span><i class="legend__box legend__box--marked"></i> Marcada</span>
+          </div>
+        </aside>
+
+        @if (currentQuestion(); as question) {
+          <article class="question-panel app-card">
+            <div class="question-panel__head">
+              <div>
+                <span class="question-panel__block">{{ question.blockTitle }}</span>
+                <h2>Questão {{ currentIndex() + 1 }}</h2>
+              </div>
+              <p-button
+                [icon]="question.isMarked ? 'pi pi-flag-fill' : 'pi pi-flag'"
+                [label]="question.isMarked ? 'Marcada' : 'Marcar'"
+                severity="secondary"
+                [outlined]="!question.isMarked"
+                [disabled]="attemptState.status === 'finished'"
+                (onClick)="toggleMark(question)"
+              />
+            </div>
+
+            <div class="prompt">
+              @for (paragraph of promptParagraphs(question.prompt); track paragraph) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+
+            <div class="options">
+              @for (option of question.options; track option.key) {
+                <button
+                  type="button"
+                  class="option"
+                  [class]="optionClass(question, option.key)"
+                  [disabled]="attemptState.status === 'finished'"
+                  (click)="saveAnswer(question, option.key)"
+                >
+                  <span class="option__key">{{ option.key }}</span>
+                  <span class="option__text">{{ option.text }}</span>
+                  @if (savingQuestionId() === question.id && question.selectedOption === option.key) {
+                    <i class="pi pi-spin pi-spinner"></i>
+                  }
+                </button>
+              }
+            </div>
+
+            @if (attemptState.status === 'finished') {
+              <div class="review-box" [class.review-box--success]="question.isCorrect" [class.review-box--danger]="question.isCorrect === false">
+                <strong>
+                  {{ question.isCorrect ? 'Resposta correta' : 'Resposta incorreta' }}
+                </strong>
+                <span>
+                  Gabarito: alternativa {{ question.correctOption }}.
+                  {{ question.explanation }}
+                </span>
+              </div>
+            }
+
+            <div class="question-panel__footer">
+              <p-button
+                icon="pi pi-arrow-left"
+                label="Anterior"
+                severity="secondary"
+                [outlined]="true"
+                [disabled]="currentIndex() === 0"
+                (onClick)="previousQuestion()"
+              />
+              <p-button
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                label="Próxima"
+                [disabled]="currentIndex() === attemptState.questions.length - 1"
+                (onClick)="nextQuestion()"
+              />
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

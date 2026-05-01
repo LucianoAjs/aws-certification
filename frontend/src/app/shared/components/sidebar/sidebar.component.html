@@ -1,0 +1,39 @@
+@if (isMobile && !isSidebarCollapsed) {
+  <button
+    type="button"
+    class="sidebar-backdrop"
+    aria-label="Fechar menu"
+    (click)="closeRequested.emit()"
+  ></button>
+}
+
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="isCollapsedRail"
+  [class.sidebar--mobile]="isMobile"
+  [class.sidebar--hidden]="isMobile && isSidebarCollapsed"
+>
+  <div class="sidebar__header">
+    <span class="sidebar__eyebrow" *ngIf="!isCollapsedRail">Study lab</span>
+    <strong *ngIf="!isCollapsedRail">AWS IAM Security</strong>
+    <strong class="sidebar__short" *ngIf="isCollapsedRail">IAM</strong>
+  </div>
+
+  <nav class="sidebar__nav" aria-label="Navegação principal">
+    <a
+      *ngFor="let item of menuItems"
+      class="sidebar__link"
+      [class.is-active]="isActive(item.routerLink)"
+      [routerLink]="item.routerLink"
+      (click)="isMobile ? closeRequested.emit() : null"
+    >
+      <i [class]="item.icon"></i>
+      <span *ngIf="!isCollapsedRail">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <div class="sidebar__footer" *ngIf="!isCollapsedRail">
+    <span>SQLite local</span>
+    <strong>Temas via Excel</strong>
+  </div>
+</aside>

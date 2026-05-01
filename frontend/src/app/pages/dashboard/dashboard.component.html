@@ -1,0 +1,146 @@
+<section class="dashboard">
+  <div class="dashboard__intro">
+    <div>
+      <span class="page-kicker">
+        <i class="pi pi-shield"></i>
+        Treino local
+      </span>
+      <h1 class="page-title">{{ exam()?.title || 'AWS Certification Trainer' }}</h1>
+      <p class="page-subtitle">
+        Responda em modo cronometrado, acompanhe tentativas no SQLite local e revise o gabarito comentado depois de finalizar.
+      </p>
+    </div>
+
+    <div class="dashboard__actions">
+      @if (progress()?.summary?.activeAttempt; as activeAttempt) {
+        <p-button
+          icon="pi pi-play"
+          label="Retomar"
+          (onClick)="resume(activeAttempt)"
+        />
+      }
+      <p-button
+        icon="pi pi-stopwatch"
+        label="Iniciar prova completa"
+        (onClick)="startFullExam()"
+      />
+    </div>
+  </div>
+
+  <section class="theme-switcher app-card">
+    <div>
+      <span class="theme-switcher__label">Tema ativo</span>
+      <strong>{{ selectedTheme()?.name || 'Nenhum tema selecionado' }}</strong>
+      <span>{{ selectedTheme()?.questionCount || 0 }} questões disponíveis</span>
+    </div>
+
+    <div class="theme-switcher__controls">
+      <select
+        [value]="selectedThemeId() || ''"
+        (change)="selectTheme($any($event.target).value)"
+      >
+        @for (theme of themes(); track theme.id) {
+          <option [value]="theme.id">
+            {{ theme.name }} · {{ theme.questionCount }} questões
+          </option>
+        }
+      </select>
+      <a routerLink="/temas" class="panel-link">Gerenciar temas</a>
+    </div>
+  </section>
+
+  <div class="metrics">
+    <article class="metric app-card">
+      <span class="metric__label">Melhor score</span>
+      <strong>{{ progress()?.summary?.bestScore || 0 }}%</strong>
+      <i class="pi pi-trophy"></i>
+    </article>
+    <article class="metric app-card">
+      <span class="metric__label">Media</span>
+      <strong>{{ progress()?.summary?.averageScore || 0 }}%</strong>
+      <i class="pi pi-chart-line"></i>
+    </article>
+    <article class="metric app-card">
+      <span class="metric__label">Tentativas</span>
+      <strong>{{ progress()?.summary?.finishedAttempts || 0 }}</strong>
+      <i class="pi pi-history"></i>
+    </article>
+    <article class="metric app-card">
+      <span class="metric__label">Questões</span>
+      <strong>{{ exam()?.totalQuestions || 0 }}</strong>
+      <i class="pi pi-list-check"></i>
+    </article>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="app-card panel">
+      <div class="panel__header">
+        <div>
+          <h2 class="app-section-title">Blocos de treino</h2>
+          <p class="app-muted">Os blocos mudam conforme o tema selecionado.</p>
+        </div>
+      </div>
+
+      <div class="block-list">
+        @for (block of exam()?.blocks || []; track block.number) {
+          <article class="block-row">
+            <div class="block-row__number">{{ block.number }}</div>
+            <div class="block-row__content">
+              <strong>{{ block.title }}</strong>
+              <span>{{ block.questionCount }} questões · {{ block.timeLimitMinutes }} min</span>
+            </div>
+            <p-button
+              icon="pi pi-play"
+              label="Treinar"
+              severity="secondary"
+              (onClick)="startBlock(block)"
+            />
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <i class="pi pi-file-excel"></i>
+            <span>Este tema ainda não tem questões importadas.</span>
+            <a routerLink="/temas" class="panel-link">Enviar planilha</a>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="app-card panel">
+      <div class="panel__header">
+        <div>
+          <h2 class="app-section-title">Últimas tentativas</h2>
+          <p class="app-muted">Histórico salvo em SQLite no backend local.</p>
+        </div>
+        <a routerLink="/tentativas" class="panel-link">Ver tudo</a>
+      </div>
+
+      <div class="attempt-list">
+        @for (attempt of (progress()?.attempts || []).slice(0, 5); track attempt.id) {
+          <button type="button" class="attempt-row" (click)="openAttempt(attempt)">
+            <span>
+              <strong>
+                {{ attempt.mode === 'full' ? 'Prova completa' : 'Bloco ' + attempt.blockNumber }}
+              </strong>
+              <small>{{ attempt.themeName || 'Tema removido' }}</small>
+              <small>{{ attempt.startedAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+            </span>
+            @if (attempt.status === 'finished') {
+              <p-tag
+                [value]="attempt.score + '%'"
+                [severity]="scoreSeverity(attempt.score)"
+              />
+            } @else {
+              <p-tag value="Em andamento" severity="info" />
+            }
+          </button>
+        } @empty {
+          <div class="empty-state">
+            <i class="pi pi-compass"></i>
+            <span>Nenhuma tentativa registrada ainda.</span>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</section>

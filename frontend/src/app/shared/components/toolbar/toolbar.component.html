@@ -1,0 +1,28 @@
+<header class="topbar">
+  <div class="topbar__left">
+    <p-button
+      icon="pi pi-bars"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+      ariaLabel="Alternar menu"
+      (onClick)="menuToggle.emit()"
+    />
+
+    <a class="brand" routerLink="/dashboard" aria-label="AWS Cert Trainer">
+      <span class="brand__mark">AWS</span>
+      <span class="brand__text">Cert Trainer</span>
+    </a>
+  </div>
+
+  <div class="topbar__right">
+    <span class="topbar-chip">
+      <i class="pi pi-database"></i>
+      SQLite local
+    </span>
+    <span class="topbar-chip topbar-chip--exam">
+      <i class="pi pi-stopwatch"></i>
+      Certification mode
+    </span>
+  </div>
+</header>

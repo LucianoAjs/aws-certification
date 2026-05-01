@@ -1,0 +1,143 @@
+<section class="themes-page">
+  <div class="themes-hero app-card">
+    <div>
+      <span class="page-kicker">
+        <i class="pi pi-book"></i>
+        Banco de questões
+      </span>
+      <h1 class="page-title">Temas e importação por Excel</h1>
+      <p class="page-subtitle">
+        Crie temas de estudo, envie perguntas por CSV compatível com Excel e escolha qual conjunto será usado no simulado.
+      </p>
+    </div>
+
+    <div class="themes-hero__actions">
+      <p-button
+        icon="pi pi-download"
+        label="Baixar modelo"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="downloadTemplate()"
+      />
+      <p-button
+        icon="pi pi-stopwatch"
+        label="Treinar tema"
+        [disabled]="!selectedTheme()?.questionCount"
+        (onClick)="startSelectedTheme()"
+      />
+    </div>
+  </div>
+
+  @if (message()) {
+    <div class="notice notice--success">
+      <i class="pi pi-check-circle"></i>
+      {{ message() }}
+    </div>
+  }
+
+  @if (error()) {
+    <div class="notice notice--error">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ error() }}
+    </div>
+  }
+
+  <div class="themes-grid">
+    <section class="theme-list app-card">
+      <div class="panel-head">
+        <div>
+          <h2 class="app-section-title">Temas disponíveis</h2>
+          <p class="app-muted">Selecione o tema ativo do simulado.</p>
+        </div>
+      </div>
+
+      <div class="theme-items">
+        @for (theme of themes(); track theme.id) {
+          <button
+            type="button"
+            class="theme-item"
+            [class.is-selected]="selectedThemeId() === theme.id"
+            (click)="selectTheme(theme.id)"
+          >
+            <span class="theme-item__mark" [style.background]="theme.color || '#147eba'"></span>
+            <span>
+              <strong>{{ theme.name }}</strong>
+              <small>{{ theme.questionCount }} questões · {{ theme.sourceType }}</small>
+            </span>
+            <p-tag
+              [value]="selectedThemeId() === theme.id ? 'Ativo' : 'Tema'"
+              [severity]="selectedThemeId() === theme.id ? 'success' : 'info'"
+            />
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="theme-workspace app-card">
+      <div class="panel-head">
+        <div>
+          <h2 class="app-section-title">Adicionar perguntas</h2>
+          <p class="app-muted">Use o modelo CSV no Excel para manter o formato consistente.</p>
+        </div>
+      </div>
+
+      <div class="selected-theme">
+        <span>Tema selecionado</span>
+        <strong>{{ selectedTheme()?.name || 'Nenhum tema selecionado' }}</strong>
+        <small>{{ selectedTheme()?.description || 'Crie ou selecione um tema para importar.' }}</small>
+      </div>
+
+      <div class="upload-box">
+        <label for="questions-file">Planilha de questões</label>
+        <input
+          id="questions-file"
+          type="file"
+          accept=".csv,text/csv"
+          (change)="onFileChange($event)"
+        />
+        <span>{{ selectedFile?.name || 'Nenhum arquivo selecionado' }}</span>
+
+        <label class="check-row">
+          <input type="checkbox" [(ngModel)]="replaceExisting" />
+          Substituir questões existentes deste tema
+        </label>
+
+        <p-button
+          icon="pi pi-upload"
+          label="Enviar planilha"
+          [loading]="loading()"
+          [disabled]="!selectedThemeId() || !selectedFile"
+          (onClick)="uploadQuestions()"
+        />
+      </div>
+
+      <div class="create-theme">
+        <h3>Criar novo tema</h3>
+        <div class="form-grid">
+          <label>
+            Nome
+            <input
+              type="text"
+              [(ngModel)]="newThemeName"
+              placeholder="Ex.: AWS S3 Security"
+            />
+          </label>
+          <label>
+            Descrição
+            <input
+              type="text"
+              [(ngModel)]="newThemeDescription"
+              placeholder="Foco, nível ou certificação"
+            />
+          </label>
+        </div>
+        <p-button
+          icon="pi pi-plus"
+          label="Criar tema"
+          severity="secondary"
+          (onClick)="createTheme()"
+        />
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,31 @@
+.app-shell {
+  min-height: 100dvh;
+  background: var(--app-bg);
+}
+
+.app-shell__body {
+  min-height: calc(100dvh - var(--app-topbar-h));
+  padding-left: var(--app-sidebar-w);
+  transition: padding-left 160ms ease;
+}
+
+.app-shell__body.is-collapsed {
+  padding-left: var(--app-sidebar-collapsed-w);
+}
+
+.app-shell__main {
+  width: 100%;
+  min-width: 0;
+  padding: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .app-shell__body,
+  .app-shell__body.is-collapsed {
+    padding-left: 0;
+  }
+
+  .app-shell__main {
+    padding: 1rem;
+  }
+}
