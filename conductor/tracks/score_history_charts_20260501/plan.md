@@ -1,0 +1,29 @@
+# Implementation Plan - Enhance Dashboard with Score History Charts
+
+## Phase 1: Foundation and Backend Enhancements
+- [ ] Task: Conductor - Setup Chart.js dependencies in frontend
+    - [ ] Install `chart.js` and ensure `primeng/chart` is available.
+    - [ ] Add `ChartModule` to `DashboardComponent` imports.
+- [ ] Task: Conductor - Enhance Progress API for Chart Data
+    - [ ] Update `ProgressPayload` model in frontend to include chart data structures.
+    - [ ] Modify `ProgressService` in backend to aggregate scores by date and domain.
+    - [ ] Add unit tests for the new aggregation logic in `ProgressService`.
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)
+
+## Phase 2: Frontend Chart Implementation
+- [ ] Task: Conductor - Implement Score History Line Chart
+    - [ ] Create a dedicated chart section in `DashboardComponent`.
+    - [ ] Map backend progress data to Chart.js line chart format.
+    - [ ] Style the chart with AWS-inspired colors (Orange/Blue).
+- [ ] Task: Conductor - Implement Domain Performance Bar Chart
+    - [ ] Aggregate average scores by `blockTitle` from attempts.
+    - [ ] Map data to Chart.js bar chart format.
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Implementation' (Protocol in workflow.md)
+
+## Phase 3: Polishing and Responsive Design
+- [ ] Task: Conductor - Refine Dashboard Layout
+    - [ ] Use PrimeFlex to create a grid layout for charts and summary cards.
+    - [ ] Ensure charts are readable on mobile devices.
+- [ ] Task: Conductor - Add Interactivity and Tooltips
+    - [ ] Configure Chart.js options for custom tooltips showing exam dates and themes.
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Polishing' (Protocol in workflow.md)
