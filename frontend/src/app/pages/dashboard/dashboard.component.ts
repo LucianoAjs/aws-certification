@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
+import { ChartModule } from 'primeng/chart';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
 import { forkJoin } from 'rxjs';
@@ -17,7 +18,15 @@ import { ExamApiService } from '../../core/services/exam-api.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, ProgressBarModule, TagModule, DatePipe],
+  imports: [
+    CommonModule,
+    RouterLink,
+    ButtonModule,
+    ChartModule,
+    ProgressBarModule,
+    TagModule,
+    DatePipe,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
