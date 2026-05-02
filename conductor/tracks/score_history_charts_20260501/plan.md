@@ -8,7 +8,7 @@
     - [ ] Update `ProgressPayload` model in frontend to include chart data structures.
     - [ ] Modify `ProgressService` in backend to aggregate scores by date and domain.
     - [ ] Add unit tests for the new aggregation logic in `ProgressService`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md) (611d12e)
 
 ## Phase 2: Frontend Chart Implementation
 - [ ] Task: Conductor - Implement Score History Line Chart
