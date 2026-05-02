@@ -43,32 +43,86 @@ export class DashboardComponent implements OnInit {
   readonly scoreHistoryData = computed(() => {
     const history = this.progress()?.chartData.scoreHistory ?? [];
     return {
-      labels: history.map((h, i) => i + 1), // Using index as label for clarity if dates are many
+      labels: history.map((h, i) => i + 1),
       datasets: [
         {
           label: 'Score %',
           data: history.map((h) => h.score),
-          fill: false,
+          fill: true,
           borderColor: '#FF9900',
+          backgroundColor: 'rgba(255, 153, 0, 0.1)',
           tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#FF9900',
         },
       ],
     };
   });
 
   readonly scoreHistoryOptions = {
+    responsive: true,
     maintainAspectRatio: false,
-    aspectRatio: 0.8,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+    scales: {
+      x: {
+        display: true,
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          stepSize: 20,
+          callback: (value: any) => value + '%',
+        },
+      },
+    },
+  };
+
+  readonly domainPerformanceData = computed(() => {
+    const stats = this.progress()?.chartData.domainPerformance ?? [];
+    return {
+      labels: stats.map((s) => s.domain),
+      datasets: [
+        {
+          label: 'Média %',
+          data: stats.map((s) => s.averageScore),
+          backgroundColor: '#147eba',
+          borderRadius: 4,
+        },
+      ],
+    };
+  });
+
+  readonly domainPerformanceOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
       },
     },
     scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+      },
       y: {
         beginAtZero: true,
         max: 100,
         ticks: {
+          stepSize: 20,
           callback: (value: any) => value + '%',
         },
       },

@@ -84,6 +84,18 @@
         <p-chart type="line" [data]="scoreHistoryData()" [options]="scoreHistoryOptions"></p-chart>
       </div>
     </section>
+
+    <section class="app-card panel chart-container">
+      <div class="panel__header">
+        <div>
+          <h2 class="app-section-title">Desempenho por Domínio</h2>
+          <p class="app-muted">Média de acertos por serviço AWS.</p>
+        </div>
+      </div>
+      <div class="chart-box">
+        <p-chart type="bar" [data]="domainPerformanceData()" [options]="domainPerformanceOptions"></p-chart>
+      </div>
+    </section>
   </div>
 
   <div class="dashboard-grid">
