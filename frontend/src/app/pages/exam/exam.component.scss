@@ -19,7 +19,11 @@
 .setup {
   display: grid;
   gap: 1.25rem;
-  padding: 1.25rem;
+  padding: 1rem;
+
+  @media (min-width: 720px) {
+    padding: 1.25rem;
+  }
 }
 
 .mode-grid {
@@ -35,30 +39,37 @@
 .theme-select {
   display: grid;
   gap: 0.45rem;
-  padding: 1rem;
+  padding: 0.85rem;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   background: var(--app-panel-soft);
 
+  @media (min-width: 720px) {
+    padding: 1rem;
+  }
+
   label {
     color: var(--app-orange-dark);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 900;
     text-transform: uppercase;
   }
 
   select {
-    height: 2.55rem;
+    width: 100%;
+    height: 2.75rem;
     padding: 0 0.75rem;
     border: 1px solid var(--app-border);
     border-radius: 7px;
     color: var(--app-text);
     background: #fff;
+    font-size: 0.95rem;
   }
 
   span {
     margin: 0.35rem 0 0;
     color: var(--app-text-muted);
+    font-size: 0.85rem;
   }
 }
 
@@ -90,8 +101,13 @@
     font-size: 1.35rem;
   }
 
+  strong {
+    font-size: 1rem;
+  }
+
   span {
     color: var(--app-text-muted);
+    font-size: 0.85rem;
   }
 }
 
@@ -100,7 +116,7 @@
   grid-template-columns: 1fr;
   gap: 0.75rem;
 
-  @media (min-width: 520px) {
+  @media (min-width: 480px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -111,20 +127,32 @@
 
 .setup__footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: stretch;
+
+  @media (min-width: 480px) {
+    justify-content: flex-end;
+  }
+
+  p-button {
+    width: 100%;
+    @media (min-width: 480px) {
+      width: auto;
+    }
+  }
 }
 
 .exam-top,
 .progress-strip {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1rem;
+  gap: 1rem;
+  padding: 0.85rem;
 
   @media (min-width: 720px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding: 1rem;
   }
 }
 
@@ -149,13 +177,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 2.5rem;
-  padding: 0 0.8rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
   border: 1px solid var(--app-border);
   border-radius: 8px;
   color: var(--app-blue);
   background: var(--app-blue-soft);
   font-weight: 900;
+  font-size: 1.1rem;
 
   &--low {
     color: var(--app-red);
@@ -165,6 +194,13 @@
   &--done {
     color: var(--app-green);
     background: var(--app-green-soft);
+  }
+}
+
+.progress-strip {
+  span {
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 }
 
@@ -190,7 +226,10 @@
 
 .question-map,
 .question-panel {
-  padding: 1rem;
+  padding: 0.85rem;
+  @media (min-width: 720px) {
+    padding: 1rem;
+  }
 }
 
 .question-map {
@@ -325,19 +364,24 @@
 
 .question-panel h2 {
   margin: 0.2rem 0 0;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
 }
 
 .prompt {
-  padding: 1rem;
+  padding: 0.85rem;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   background: var(--app-panel-soft);
 
+  @media (min-width: 720px) {
+    padding: 1rem;
+  }
+
   p {
     margin: 0;
     color: var(--app-text);
-    line-height: 1.65;
+    line-height: 1.6;
+    font-size: 1rem;
 
     & + p {
       margin-top: 0.8rem;
@@ -347,7 +391,7 @@
 
 .options {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.75rem;
 }
 
 .option {
@@ -356,8 +400,8 @@
   align-items: center;
   gap: 0.8rem;
   width: 100%;
-  min-height: 44px;
-  padding: 0.8rem;
+  min-height: 48px;
+  padding: 0.75rem;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   color: var(--app-text);
@@ -367,6 +411,7 @@
 
   @media (min-width: 480px) {
      grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+     padding: 0.85rem;
   }
 
   &:hover:not(:disabled),
@@ -417,17 +462,22 @@
 }
 
 .option__text {
-  line-height: 1.45;
+  line-height: 1.4;
+  font-size: 0.95rem;
 }
 
 .review-box {
   display: grid;
   gap: 0.35rem;
-  padding: 1rem;
+  padding: 0.85rem;
   border-radius: var(--app-radius);
   border: 1px solid var(--app-border);
   color: var(--app-text);
   background: var(--app-panel-soft);
+
+  @media (min-width: 720px) {
+    padding: 1rem;
+  }
 
   &--success {
     border-color: #9ad9bf;
@@ -437,5 +487,14 @@
   &--danger {
     border-color: #f2b6b6;
     background: var(--app-red-soft);
+  }
+
+  strong {
+    font-size: 0.95rem;
+  }
+
+  span {
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 }
