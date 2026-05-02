@@ -4,7 +4,7 @@
 - [x] Task: Conductor - Setup Chart.js dependencies in frontend (306f5af)
     - [ ] Install `chart.js` and ensure `primeng/chart` is available.
     - [ ] Add `ChartModule` to `DashboardComponent` imports.
-- [ ] Task: Conductor - Enhance Progress API for Chart Data
+- [x] Task: Conductor - Enhance Progress API for Chart Data (39bc7f8)
     - [ ] Update `ProgressPayload` model in frontend to include chart data structures.
     - [ ] Modify `ProgressService` in backend to aggregate scores by date and domain.
     - [ ] Add unit tests for the new aggregation logic in `ProgressService`.
