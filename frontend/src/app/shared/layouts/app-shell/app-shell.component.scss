@@ -27,5 +27,6 @@
 
   .app-shell__main {
     padding: 1rem;
+    padding-bottom: calc(64px + 1rem + env(safe-area-inset-bottom));
   }
 }

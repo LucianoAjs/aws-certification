@@ -5,22 +5,27 @@
   margin: 0 auto;
 }
 
-.themes-hero,
-.themes-hero__actions,
-.panel-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
 .themes-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   padding: 1.25rem;
+
+  @media (min-width: 900px) {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
 }
 
 .themes-hero__actions {
+  display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 0.65rem;
+
+  @media (min-width: 900px) {
+    justify-content: flex-end;
+  }
 }
 
 .notice {
@@ -46,8 +51,12 @@
 
 .themes-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
+
+  @media (min-width: 900px) {
+    grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
+  }
 }
 
 .theme-list,
@@ -59,9 +68,21 @@
   padding: 1rem;
 }
 
-.panel-head p {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
+.panel-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @media (min-width: 900px) {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+  }
 }
 
 .theme-items {
@@ -82,11 +103,11 @@
   background: var(--app-panel-soft);
   text-align: left;
   cursor: pointer;
-}
 
-.theme-item:hover,
-.theme-item.is-selected {
-  border-color: var(--app-blue);
+  &:hover,
+  &.is-selected {
+    border-color: var(--app-blue);
+  }
 }
 
 .theme-item__mark {
@@ -156,8 +177,12 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.75rem;
+
+  @media (min-width: 520px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .form-grid label {
@@ -166,18 +191,4 @@
   color: var(--app-text-muted);
   font-size: 0.86rem;
   font-weight: 800;
-}
-
-@media (max-width: 900px) {
-  .themes-grid,
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .themes-hero,
-  .themes-hero__actions,
-  .panel-head {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }

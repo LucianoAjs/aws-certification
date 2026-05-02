@@ -4,13 +4,20 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { ViewportService } from '../../../core/services/viewport.service';
+import { BottomTabBarComponent } from '../../components/bottom-tab-bar/bottom-tab-bar.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { ToolbarComponent } from '../../components/toolbar/toolbar.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarComponent, ToolbarComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    SidebarComponent,
+    ToolbarComponent,
+    BottomTabBarComponent,
+  ],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
 })

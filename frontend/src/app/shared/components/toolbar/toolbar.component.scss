@@ -79,6 +79,14 @@
   border-color: var(--app-orange);
 }
 
+.topbar__menu-btn {
+  display: none !important;
+
+  @media (min-width: 768px) {
+    display: inline-flex !important;
+  }
+}
+
 @media (max-width: 700px) {
   .topbar {
     padding: 0 0.75rem;

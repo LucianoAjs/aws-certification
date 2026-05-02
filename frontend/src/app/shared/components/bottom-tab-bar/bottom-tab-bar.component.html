@@ -1,0 +1,12 @@
+<nav class="bottom-tabs">
+  @for (tab of tabs; track tab.routerLink) {
+    <a
+      [routerLink]="tab.routerLink"
+      class="bottom-tabs__item"
+      [class.is-active]="isActive(tab.routerLink)"
+    >
+      <i [class]="tab.icon"></i>
+      <span>{{ tab.label }}</span>
+    </a>
+  }
+</nav>

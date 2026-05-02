@@ -1,4 +1,10 @@
 .sidebar-backdrop {
+  display: none !important;
+
+  @media (min-width: 768px) {
+    display: block !important;
+  }
+  
   position: fixed;
   inset: var(--app-topbar-h) 0 0;
   z-index: 34;
@@ -7,11 +13,16 @@
 }
 
 .sidebar {
+  display: none !important;
+
+  @media (min-width: 768px) {
+    display: flex !important;
+  }
+
   position: fixed;
   top: var(--app-topbar-h);
   left: 0;
   z-index: 35;
-  display: flex;
   flex-direction: column;
   width: var(--app-sidebar-w);
   height: calc(100dvh - var(--app-topbar-h));

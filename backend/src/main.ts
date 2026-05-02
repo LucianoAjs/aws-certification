@@ -15,7 +15,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = Number(process.env.PORT ?? 3333);
+  const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
   console.log(`AWS trainer API on http://localhost:${port}`);
 }
