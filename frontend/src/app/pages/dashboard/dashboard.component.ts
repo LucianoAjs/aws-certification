@@ -62,6 +62,7 @@ export class DashboardComponent implements OnInit {
   readonly scoreHistoryOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    aspectRatio: 1.5,
     plugins: {
       legend: {
         display: false,
@@ -107,6 +108,7 @@ export class DashboardComponent implements OnInit {
   readonly domainPerformanceOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    aspectRatio: 1.5,
     plugins: {
       legend: {
         display: false,

@@ -154,9 +154,14 @@
               </button>
             }
           </div>
-          <div class="legend">
-            <span><i class="legend__box legend__box--answered"></i> Respondida</span>
-            <span><i class="legend__box legend__box--marked"></i> Marcada</span>
+          <div class="legend" [class.legend--finished]="attemptState.status === 'finished'">
+            @if (attemptState.status === 'finished') {
+              <span><i class="legend__box legend__box--answered"></i> Correta</span>
+              <span><i class="legend__box legend__box--wrong"></i> Incorreta</span>
+            } @else {
+              <span><i class="legend__box legend__box--answered"></i> Respondida</span>
+              <span><i class="legend__box legend__box--marked"></i> Marcada</span>
+            }
           </div>
         </aside>
 

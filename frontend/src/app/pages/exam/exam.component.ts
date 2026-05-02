@@ -233,6 +233,13 @@ export class ExamComponent implements OnInit, OnDestroy {
 
   questionStatus(question: ExamQuestion, index: number) {
     if (this.currentIndex() === index) return 'current';
+
+    const attempt = this.attempt();
+    if (attempt?.status === 'finished') {
+      if (!question.selectedOption) return 'blank';
+      return question.isCorrect ? 'correct' : 'wrong';
+    }
+
     if (question.isMarked) return 'marked';
     if (question.selectedOption) return 'answered';
     return 'blank';

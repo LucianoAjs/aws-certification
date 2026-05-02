@@ -239,6 +239,18 @@
     color: var(--app-purple);
     background: var(--app-purple-soft);
   }
+
+  &--correct {
+    border-color: #b6e2cf;
+    color: var(--app-green);
+    background: var(--app-green-soft);
+  }
+
+  &--wrong {
+    border-color: #f3b8b8;
+    color: var(--app-red);
+    background: var(--app-red-soft);
+  }
 }
 
 .legend {
@@ -252,6 +264,17 @@
     display: flex;
     align-items: center;
     gap: 0.45rem;
+  }
+
+  &--finished {
+    .legend__box--answered {
+      background: var(--app-green-soft);
+      border-color: #b6e2cf;
+    }
+    .legend__box--wrong {
+      background: var(--app-red-soft);
+      border: 1px solid #f3b8b8;
+    }
   }
 }
 
@@ -268,6 +291,11 @@
   &--marked {
     background: var(--app-purple-soft);
     border: 1px solid #d6d0ff;
+  }
+
+  &--wrong {
+    background: var(--app-red-soft);
+    border: 1px solid #f3b8b8;
   }
 }
 
