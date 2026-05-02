@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
@@ -39,6 +39,41 @@ export class DashboardComponent implements OnInit {
   readonly selectedThemeId = signal<string | null>(localStorage.getItem('activeThemeId'));
   readonly progress = signal<ProgressPayload | null>(null);
   readonly loading = signal(true);
+
+  readonly scoreHistoryData = computed(() => {
+    const history = this.progress()?.chartData.scoreHistory ?? [];
+    return {
+      labels: history.map((h, i) => i + 1), // Using index as label for clarity if dates are many
+      datasets: [
+        {
+          label: 'Score %',
+          data: history.map((h) => h.score),
+          fill: false,
+          borderColor: '#FF9900',
+          tension: 0.4,
+        },
+      ],
+    };
+  });
+
+  readonly scoreHistoryOptions = {
+    maintainAspectRatio: false,
+    aspectRatio: 0.8,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          callback: (value: any) => value + '%',
+        },
+      },
+    },
+  };
 
   ngOnInit(): void {
     this.load();

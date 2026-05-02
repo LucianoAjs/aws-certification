@@ -72,6 +72,20 @@
     </article>
   </div>
 
+  <div class="dashboard-charts">
+    <section class="app-card panel chart-container">
+      <div class="panel__header">
+        <div>
+          <h2 class="app-section-title">Histórico de Score</h2>
+          <p class="app-muted">Últimas 20 tentativas finalizadas.</p>
+        </div>
+      </div>
+      <div class="chart-box">
+        <p-chart type="line" [data]="scoreHistoryData()" [options]="scoreHistoryOptions"></p-chart>
+      </div>
+    </section>
+  </div>
+
   <div class="dashboard-grid">
     <section class="app-card panel">
       <div class="panel__header">
