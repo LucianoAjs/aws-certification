@@ -5,7 +5,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "node --watch --no-warnings=ExperimentalWarning -r ts-node/register -r tsconfig-paths/register src/main.ts",
-    "start": "npm run build && node --no-warnings=ExperimentalWarning dist/main.js"
+    "start": "npm run build && node --no-warnings=ExperimentalWarning dist/main.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.19",
@@ -20,8 +23,12 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.19",
+    "@types/jest": "^30.0.0",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.6.0",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"

@@ -96,4 +96,8 @@ export interface ProgressSummary {
 export interface ProgressPayload {
   attempts: AttemptListItem[];
   summary: ProgressSummary;
+  chartData: {
+    scoreHistory: { date: string; score: number }[];
+    domainPerformance: { domain: string; averageScore: number }[];
+  };
 }
