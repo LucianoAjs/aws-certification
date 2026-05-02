@@ -1,7 +1,7 @@
 # Implementation Plan - Enhance Dashboard with Score History Charts
 
 ## Phase 1: Foundation and Backend Enhancements
-- [ ] Task: Conductor - Setup Chart.js dependencies in frontend
+- [x] Task: Conductor - Setup Chart.js dependencies in frontend (306f5af)
     - [ ] Install `chart.js` and ensure `primeng/chart` is available.
     - [ ] Add `ChartModule` to `DashboardComponent` imports.
 - [ ] Task: Conductor - Enhance Progress API for Chart Data
