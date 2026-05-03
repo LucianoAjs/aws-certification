@@ -1,0 +1,79 @@
+<main class="login-page">
+  <section class="login-panel app-card">
+    <div class="login-panel__brand">
+      <span class="brand-mark">AWS</span>
+      <div>
+        <span class="page-kicker">Certification trainer</span>
+        <h1 class="page-title">Entrar no seu estudo</h1>
+      </div>
+    </div>
+
+    <div class="mode-tabs" role="tablist" aria-label="Modo de autenticacao">
+      <button
+        type="button"
+        [class.is-active]="mode() === 'login'"
+        (click)="setMode('login')"
+      >
+        Entrar
+      </button>
+      <button
+        type="button"
+        [class.is-active]="mode() === 'register'"
+        (click)="setMode('register')"
+      >
+        Criar conta
+      </button>
+    </div>
+
+    <form class="login-form" (ngSubmit)="submit()">
+      @if (mode() === 'register') {
+        <label>
+          Nome
+          <input
+            type="text"
+            [(ngModel)]="name"
+            name="name"
+            autocomplete="name"
+            placeholder="Seu nome"
+          />
+        </label>
+      }
+
+      <label>
+        Email
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          autocomplete="email"
+          placeholder="voce@email.com"
+        />
+      </label>
+
+      <label>
+        Senha
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="Minimo 8 caracteres"
+        />
+      </label>
+
+      @if (error()) {
+        <div class="login-error">
+          <i class="pi pi-exclamation-triangle"></i>
+          {{ error() }}
+        </div>
+      }
+
+      <p-button
+        type="submit"
+        icon="pi pi-lock"
+        [label]="mode() === 'register' ? 'Criar conta' : 'Entrar'"
+        [loading]="loading()"
+      />
+    </form>
+  </section>
+</main>

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateThemeDto {
   @IsString()
@@ -15,4 +15,8 @@ export class CreateThemeDto {
   @IsString()
   @MaxLength(24)
   color?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isShared?: boolean;
 }

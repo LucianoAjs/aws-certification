@@ -1,18 +1,22 @@
-import { Controller, Delete, Get, HttpCode } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../../auth/auth.guard';
+import { AuthUser } from '../../auth/auth.types';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { ProgressService } from '../services/progress.service';
 
 @Controller('progress')
+@UseGuards(AuthGuard)
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 
   @Get()
-  getProgress() {
-    return this.progressService.getProgress();
+  getProgress(@CurrentUser() user: AuthUser) {
+    return this.progressService.getProgress(user.id);
   }
 
   @Delete()
   @HttpCode(204)
-  resetProgress() {
-    this.progressService.reset();
+  async resetProgress(@CurrentUser() user: AuthUser) {
+    await this.progressService.reset(user.id);
   }
 }

@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sessions     AuthSession[]
+  themes       Theme[]
+  attempts     Attempt[]
+
+  @@map("users")
+}
+
+model AuthSession {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model Theme {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  color       String?
+  sourceType  String     @default("manual")
+  ownerUserId String
+  isShared    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  owner       User       @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  attempts    Attempt[]
+
+  @@index([ownerUserId, isShared])
+  @@map("themes")
+}
+
+model Question {
+  id                    Int      @id @default(autoincrement())
+  themeId               String
+  blockNumber           Int
+  blockTitle            String
+  blockTimeLimitMinutes Int      @default(40)
+  prompt                String
+  optionA               String
+  optionB               String
+  optionC               String
+  optionD               String
+  correctOption         String
+  explanation           String
+  sortOrder             Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  theme                 Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@index([themeId, sortOrder])
+  @@map("questions")
+}
+
+model Attempt {
+  id               String   @id @default(uuid())
+  examId           String
+  userId           String
+  mode             String
+  blockNumber      Int?
+  questionCount    Int
+  timeLimitSeconds Int?
+  startedAt        DateTime
+  finishedAt       DateTime?
+  status           String   @default("in_progress")
+  score            Int      @default(0)
+  correctCount     Int      @default(0)
+  theme            Theme    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers          Answer[]
+
+  @@index([userId, startedAt])
+  @@index([examId])
+  @@map("attempts")
+}
+
+model Answer {
+  attemptId      String
+  questionId     Int
+  selectedOption String?
+  isMarked       Boolean  @default(false)
+  answeredAt     DateTime
+  attempt        Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@id([attemptId, questionId])
+  @@map("answers")
+}

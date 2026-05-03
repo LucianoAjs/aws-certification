@@ -19,8 +19,8 @@ export class AttemptService {
     private readonly examRepository: ExamRepository,
   ) {}
 
-  createAttempt(dto: CreateAttemptDto) {
-    const exam = this.examRepository.findExam(dto.themeId);
+  async createAttempt(userId: string, dto: CreateAttemptDto) {
+    const exam = await this.examRepository.findExam(userId, dto.themeId);
     const block =
       dto.mode === 'block'
         ? exam.blocks.find((item) => item.number === dto.blockNumber)
@@ -40,8 +40,9 @@ export class AttemptService {
         ? block!.timeLimitMinutes
         : exam.fullExamTimeLimitMinutes) * 60;
 
-    const attempt = this.attemptRepository.createAttempt({
+    const attempt = await this.attemptRepository.createAttempt({
       id: randomUUID(),
+      userId,
       themeId: exam.id,
       mode: dto.mode,
       blockNumber: dto.mode === 'block' ? block!.number : null,
@@ -53,26 +54,26 @@ export class AttemptService {
     return this.attemptPayload(attempt);
   }
 
-  getAttempt(id: string) {
-    return this.attemptPayload(this.requireAttempt(id));
+  async getAttempt(userId: string, id: string) {
+    return this.attemptPayload(await this.requireAttempt(userId, id));
   }
 
-  reviewAttempt(id: string) {
-    const attempt = this.requireAttempt(id);
-    const finished = attempt.status === 'finished' ? attempt : this.finishAttemptRow(attempt);
+  async reviewAttempt(userId: string, id: string) {
+    const attempt = await this.requireAttempt(userId, id);
+    const finished = attempt.status === 'finished' ? attempt : await this.finishAttemptRow(attempt);
     return this.attemptPayload(finished, true);
   }
 
-  saveAnswer(attemptId: string, questionId: number, dto: SaveAnswerDto) {
-    const attempt = this.ensureAttemptFresh(this.requireAttempt(attemptId));
+  async saveAnswer(userId: string, attemptId: string, questionId: number, dto: SaveAnswerDto) {
+    const attempt = await this.ensureAttemptFresh(await this.requireAttempt(userId, attemptId));
     this.assertInProgress(attempt);
-    const question = this.assertQuestionInAttempt(attempt, questionId);
+    const question = await this.assertQuestionInAttempt(attempt, questionId);
 
     if (!question.options.some((option) => option.key === dto.selectedOption)) {
       throw new BadRequestException('Alternativa invalida.');
     }
 
-    this.attemptRepository.upsertAnswer({
+    await this.attemptRepository.upsertAnswer({
       attemptId,
       questionId,
       selectedOption: dto.selectedOption,
@@ -80,29 +81,29 @@ export class AttemptService {
       answeredAt: new Date().toISOString(),
     });
 
-    return this.attemptPayload(this.requireAttempt(attemptId));
+    return this.attemptPayload(await this.requireAttempt(userId, attemptId));
   }
 
-  markQuestion(attemptId: string, questionId: number, dto: MarkQuestionDto) {
-    const attempt = this.ensureAttemptFresh(this.requireAttempt(attemptId));
+  async markQuestion(userId: string, attemptId: string, questionId: number, dto: MarkQuestionDto) {
+    const attempt = await this.ensureAttemptFresh(await this.requireAttempt(userId, attemptId));
     this.assertInProgress(attempt);
-    this.assertQuestionInAttempt(attempt, questionId);
+    await this.assertQuestionInAttempt(attempt, questionId);
 
-    this.attemptRepository.markQuestion({
+    await this.attemptRepository.markQuestion({
       attemptId,
       questionId,
       isMarked: dto.isMarked,
       answeredAt: new Date().toISOString(),
     });
 
-    return this.attemptPayload(this.requireAttempt(attemptId));
+    return this.attemptPayload(await this.requireAttempt(userId, attemptId));
   }
 
-  finishAttempt(id: string) {
-    return this.attemptPayload(this.finishAttemptRow(this.requireAttempt(id)), true);
+  async finishAttempt(userId: string, id: string) {
+    return this.attemptPayload(await this.finishAttemptRow(await this.requireAttempt(userId, id)), true);
   }
 
-  ensureAttemptFresh(attempt: AttemptRow): AttemptRow {
+  async ensureAttemptFresh(attempt: AttemptRow): Promise<AttemptRow> {
     if (
       attempt.status === 'in_progress' &&
       attempt.timeLimitSeconds &&
@@ -114,17 +115,18 @@ export class AttemptService {
     return attempt;
   }
 
-  toAttemptListItem(attempt: AttemptRow) {
-    const fresh = this.ensureAttemptFresh(attempt);
+  async toAttemptListItem(attempt: AttemptRow) {
+    const fresh = await this.ensureAttemptFresh(attempt);
     return {
       id: fresh.id,
       examId: fresh.examId,
+      userId: fresh.userId,
       themeName: fresh.themeName ?? null,
       mode: fresh.mode,
       blockNumber: fresh.blockNumber,
       status: fresh.status,
       questionCount: fresh.questionCount,
-      answeredCount: fresh.answeredCount ?? this.answeredCount(fresh.id),
+      answeredCount: fresh.answeredCount ?? (await this.answeredCount(fresh.id)),
       timeLimitSeconds: fresh.timeLimitSeconds,
       timeRemainingSeconds: this.secondsRemaining(fresh),
       startedAt: fresh.startedAt,
@@ -134,24 +136,26 @@ export class AttemptService {
     };
   }
 
-  private attemptPayload(attempt: AttemptRow, includeReview = false) {
-    const fresh = this.ensureAttemptFresh(attempt);
-    const questions = this.examRepository.findQuestionsForAttempt({
+  private async attemptPayload(attempt: AttemptRow, includeReview = false) {
+    const fresh = await this.ensureAttemptFresh(attempt);
+    const questions = await this.examRepository.findQuestionsForAttempt({
       themeId: fresh.examId,
+      userId: fresh.userId,
       mode: fresh.mode,
       blockNumber: fresh.blockNumber,
     });
     const answers = new Map(
-      this.attemptRepository
+      (await this.attemptRepository
         .listAnswers(fresh.id)
-        .map((answer) => [answer.questionId, answer]),
+      ).map((answer) => [answer.questionId, answer]),
     );
     const reviewMode = includeReview || fresh.status === 'finished';
 
     return {
       id: fresh.id,
       examId: fresh.examId,
-      themeName: fresh.themeName ?? this.examRepository.findTheme(fresh.examId)?.name ?? null,
+      themeName:
+        fresh.themeName ?? (await this.examRepository.findTheme(fresh.examId, fresh.userId))?.name ?? null,
       mode: fresh.mode,
       blockNumber: fresh.blockNumber,
       status: fresh.status,
@@ -197,18 +201,19 @@ export class AttemptService {
     };
   }
 
-  private finishAttemptRow(attempt: AttemptRow): AttemptRow {
+  private async finishAttemptRow(attempt: AttemptRow): Promise<AttemptRow> {
     if (attempt.status === 'finished') return attempt;
 
-    const questions = this.examRepository.findQuestionsForAttempt({
+    const questions = await this.examRepository.findQuestionsForAttempt({
       themeId: attempt.examId,
+      userId: attempt.userId,
       mode: attempt.mode,
       blockNumber: attempt.blockNumber,
     });
     const answers = new Map(
-      this.attemptRepository
+      (await this.attemptRepository
         .listAnswers(attempt.id)
-        .map((answer) => [answer.questionId, answer.selectedOption]),
+      ).map((answer) => [answer.questionId, answer.selectedOption]),
     );
     const correctCount = questions.reduce(
       (total, question) =>
@@ -217,7 +222,8 @@ export class AttemptService {
     );
     const score = Math.round((correctCount / questions.length) * 100);
 
-    const finished = this.attemptRepository.finishAttempt({
+    const finished = await this.attemptRepository.finishAttempt({
+      userId: attempt.userId,
       attemptId: attempt.id,
       finishedAt: new Date().toISOString(),
       score,
@@ -231,9 +237,10 @@ export class AttemptService {
     return finished;
   }
 
-  private assertQuestionInAttempt(attempt: AttemptRow, questionId: number) {
-    const questions = this.examRepository.findQuestionsForAttempt({
+  private async assertQuestionInAttempt(attempt: AttemptRow, questionId: number) {
+    const questions = await this.examRepository.findQuestionsForAttempt({
       themeId: attempt.examId,
+      userId: attempt.userId,
       mode: attempt.mode,
       blockNumber: attempt.blockNumber,
     });
@@ -250,8 +257,8 @@ export class AttemptService {
     }
   }
 
-  private requireAttempt(id: string): AttemptRow {
-    const attempt = this.attemptRepository.findAttempt(id);
+  private async requireAttempt(userId: string, id: string): Promise<AttemptRow> {
+    const attempt = await this.attemptRepository.findAttempt(userId, id);
     if (!attempt) {
       throw new NotFoundException('Tentativa nao encontrada.');
     }
@@ -268,9 +275,9 @@ export class AttemptService {
     return Math.max(0, attempt.timeLimitSeconds - elapsed);
   }
 
-  private answeredCount(attemptId: string): number {
-    return this.attemptRepository
-      .listAnswers(attemptId)
-      .filter((answer) => answer.selectedOption).length;
+  private async answeredCount(attemptId: string): Promise<number> {
+    return (await this.attemptRepository.listAnswers(attemptId)).filter(
+      (answer) => answer.selectedOption,
+    ).length;
   }
 }

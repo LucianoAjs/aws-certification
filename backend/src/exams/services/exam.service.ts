@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { Exam, ExamQuestion } from '../domain/exam.types';
 import { CreateThemeDto } from '../dto/create-theme.dto';
+import { UpdateThemeSharingDto } from '../dto/update-theme-sharing.dto';
 import { SpreadsheetQuestionImportAdapter } from '../adapters/spreadsheet-question-import.adapter';
 import { ExamRepository } from '../repositories/exam.repository';
 
@@ -11,28 +12,35 @@ export class ExamService implements OnModuleInit {
     private readonly spreadsheetAdapter: SpreadsheetQuestionImportAdapter,
   ) {}
 
-  onModuleInit() {
-    this.examRepository.ensureDefaultTheme();
+  async onModuleInit() {
+    await this.examRepository.ensureDefaultTheme();
   }
 
-  getPublicExam(themeId?: string | null) {
-    return this.toPublicExam(this.examRepository.findExam(themeId));
+  async getPublicExam(userId: string, themeId?: string | null) {
+    return this.toPublicExam(await this.examRepository.findExam(userId, themeId));
   }
 
-  listThemes() {
-    return this.examRepository.listThemes();
+  listThemes(userId: string) {
+    return this.examRepository.listThemes(userId);
   }
 
-  createTheme(dto: CreateThemeDto) {
+  createTheme(userId: string, dto: CreateThemeDto) {
     return this.examRepository.createTheme({
+      ownerUserId: userId,
       name: dto.name.trim(),
       description: dto.description?.trim() || null,
       color: dto.color?.trim() || '#147eba',
       sourceType: 'manual',
+      isShared: dto.isShared === true,
     });
   }
 
-  importQuestions(input: {
+  updateSharing(userId: string, themeId: string, dto: UpdateThemeSharingDto) {
+    return this.examRepository.updateSharing(userId, themeId, dto.isShared);
+  }
+
+  async importQuestions(input: {
+    userId: string;
     themeId: string;
     file?: { buffer: Buffer };
     replace: boolean;
@@ -43,13 +51,13 @@ export class ExamService implements OnModuleInit {
 
     const questions = this.spreadsheetAdapter.parse(input.file.buffer);
     if (input.replace) {
-      this.examRepository.replaceQuestions(input.themeId, questions);
+      await this.examRepository.replaceQuestions(input.userId, input.themeId, questions);
     } else {
-      this.examRepository.appendQuestions(input.themeId, questions);
+      await this.examRepository.appendQuestions(input.userId, input.themeId, questions);
     }
 
     return {
-      theme: this.examRepository.findTheme(input.themeId),
+      theme: await this.examRepository.findTheme(input.themeId, input.userId),
       importedQuestions: questions.length,
       mode: input.replace ? 'replace' : 'append',
     };

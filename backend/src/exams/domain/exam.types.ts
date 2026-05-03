@@ -7,6 +7,9 @@ export interface Theme {
   description: string | null;
   color: string | null;
   sourceType: string;
+  ownerUserId: string;
+  isShared: boolean;
+  isOwner?: boolean;
   questionCount: number;
   createdAt: string;
   updatedAt: string;
@@ -65,6 +68,7 @@ export interface ImportedQuestion {
 export interface AttemptRow {
   id: string;
   examId: string;
+  userId: string;
   mode: ExamMode;
   blockNumber: number | null;
   questionCount: number;

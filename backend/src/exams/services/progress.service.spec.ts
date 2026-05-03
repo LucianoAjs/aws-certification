@@ -42,7 +42,7 @@ describe('ProgressService', () => {
     examRepository = module.get<ExamRepository>(ExamRepository);
   });
 
-  it('should return progress with chartData', () => {
+  it('should return progress with chartData', async () => {
     const mockAttempts = [
       {
         id: '1',
@@ -53,21 +53,21 @@ describe('ProgressService', () => {
       },
     ];
 
-    (attemptRepository.listAttempts as jest.Mock).mockReturnValue(mockAttempts);
+    (attemptRepository.listAttempts as jest.Mock).mockResolvedValue(mockAttempts);
     (attemptService.toAttemptListItem as jest.Mock).mockImplementation((a) => a);
 
-    (attemptRepository.listAnswers as jest.Mock).mockReturnValue([
+    (attemptRepository.listAnswers as jest.Mock).mockResolvedValue([
       { questionId: 101, selectedOption: 'A' },
       { questionId: 102, selectedOption: 'B' },
     ]);
 
-    (examRepository.findQuestionById as jest.Mock).mockImplementation((id) => {
+    (examRepository.findQuestionById as jest.Mock).mockImplementation((_userId, id) => {
       if (id === 101) return { blockTitle: 'IAM', correctOption: 'A' };
       if (id === 102) return { blockTitle: 'S3', correctOption: 'A' };
       return null;
     });
 
-    const result = service.getProgress() as any;
+    const result = (await service.getProgress('local-user')) as any;
 
     expect(result.summary).toBeDefined();
     expect(result.chartData).toBeDefined();

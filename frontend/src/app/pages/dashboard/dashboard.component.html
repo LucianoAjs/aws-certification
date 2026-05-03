@@ -7,7 +7,7 @@
       </span>
       <h1 class="page-title">{{ exam()?.title || 'AWS Certification Trainer' }}</h1>
       <p class="page-subtitle">
-        Responda em modo cronometrado, acompanhe tentativas no SQLite local e revise o gabarito comentado depois de finalizar.
+        Responda em modo cronometrado, acompanhe tentativas por usuario e revise o gabarito comentado depois de finalizar.
       </p>
     </div>
 
@@ -41,7 +41,8 @@
       >
         @for (theme of themes(); track theme.id) {
           <option [value]="theme.id">
-            {{ theme.name }} · {{ theme.questionCount }} questões
+            {{ theme.name }} · {{ theme.questionCount }} questões ·
+            {{ theme.isOwner ? 'meu' : 'compartilhado' }}
           </option>
         }
       </select>
@@ -136,7 +137,7 @@
       <div class="panel__header">
         <div>
           <h2 class="app-section-title">Últimas tentativas</h2>
-          <p class="app-muted">Histórico salvo em SQLite no backend local.</p>
+          <p class="app-muted">Histórico salvo no Postgres para o usuario logado.</p>
         </div>
         <a routerLink="/tentativas" class="panel-link">Ver tudo</a>
       </div>

@@ -22,6 +22,7 @@ import {
   ProgressPayload,
   StudyTheme,
 } from '../../core/models/exam.models';
+import { AuthService } from '../../core/services/auth.service';
 import { ExamApiService } from '../../core/services/exam-api.service';
 
 @Component({
@@ -36,10 +37,11 @@ export class ExamComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   readonly exam = signal<Exam | null>(null);
   readonly themes = signal<StudyTheme[]>([]);
-  readonly selectedThemeId = signal<string | null>(localStorage.getItem('activeThemeId'));
+  readonly selectedThemeId = signal<string | null>(this.auth.getActiveThemeId());
   readonly progress = signal<ProgressPayload | null>(null);
   readonly attempt = signal<AttemptState | null>(null);
   readonly selectedMode = signal<ExamMode>('full');
@@ -93,7 +95,7 @@ export class ExamComponent implements OnInit, OnDestroy {
           null;
         this.selectedThemeId.set(themeId);
         if (themeId) {
-          localStorage.setItem('activeThemeId', themeId);
+          this.auth.setActiveThemeId(themeId);
         }
         this.currentIndex.set(0);
         this.syncTimer(attempt);
@@ -150,7 +152,7 @@ export class ExamComponent implements OnInit, OnDestroy {
 
   selectTheme(themeId: string) {
     this.selectedThemeId.set(themeId);
-    localStorage.setItem('activeThemeId', themeId);
+    this.auth.setActiveThemeId(themeId);
     this.loading.set(true);
     this.loadExam(themeId);
   }

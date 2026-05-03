@@ -11,10 +11,12 @@ export class ProgressService {
     private readonly examRepository: ExamRepository,
   ) {}
 
-  getProgress() {
-    const attempts = this.attemptRepository
-      .listAttempts()
-      .map((attempt) => this.attemptService.toAttemptListItem(attempt));
+  async getProgress(userId: string) {
+    const attempts = await Promise.all(
+      (await this.attemptRepository.listAttempts(userId)).map((attempt) =>
+        this.attemptService.toAttemptListItem(attempt),
+      ),
+    );
     const finished = attempts.filter((attempt) => attempt.status === 'finished');
     const activeAttempt =
       attempts.find((attempt) => attempt.status === 'in_progress') ?? null;
@@ -37,10 +39,10 @@ export class ProgressService {
     // Chart: Domain Performance
     const domainStats = new Map<string, { totalScore: number; count: number }>();
     for (const attempt of finished) {
-      const answers = this.attemptRepository.listAnswers(attempt.id);
+      const answers = await this.attemptRepository.listAnswers(attempt.id);
       for (const answer of answers) {
         if (!answer.selectedOption) continue;
-        const question = this.examRepository.findQuestionById(answer.questionId);
+        const question = await this.examRepository.findQuestionById(userId, answer.questionId);
         if (question) {
           const isCorrect = answer.selectedOption === question.correctOption;
           const stats = domainStats.get(question.blockTitle) ?? { totalScore: 0, count: 0 };
@@ -80,7 +82,7 @@ export class ProgressService {
     };
   }
 
-  reset() {
-    this.attemptRepository.deleteAll();
+  async reset(userId: string) {
+    await this.attemptRepository.deleteAll(userId);
   }
 }

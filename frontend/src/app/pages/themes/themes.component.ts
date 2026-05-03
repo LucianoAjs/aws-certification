@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { StudyTheme } from '../../core/models/exam.models';
+import { AuthService } from '../../core/services/auth.service';
 import { ExamApiService } from '../../core/services/exam-api.service';
 
 @Component({
@@ -17,15 +18,17 @@ import { ExamApiService } from '../../core/services/exam-api.service';
 export class ThemesComponent implements OnInit {
   private readonly api = inject(ExamApiService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   readonly themes = signal<StudyTheme[]>([]);
-  readonly selectedThemeId = signal<string | null>(localStorage.getItem('activeThemeId'));
+  readonly selectedThemeId = signal<string | null>(this.auth.getActiveThemeId());
   readonly loading = signal(false);
   readonly message = signal<string | null>(null);
   readonly error = signal<string | null>(null);
 
   newThemeName = '';
   newThemeDescription = '';
+  shareNewTheme = false;
   replaceExisting = true;
   selectedFile: File | null = null;
 
@@ -55,7 +58,7 @@ export class ThemesComponent implements OnInit {
   selectTheme(themeId: string | null) {
     this.selectedThemeId.set(themeId);
     if (themeId) {
-      localStorage.setItem('activeThemeId', themeId);
+      this.auth.setActiveThemeId(themeId);
     }
   }
 
@@ -77,11 +80,13 @@ export class ThemesComponent implements OnInit {
         name,
         description: this.newThemeDescription.trim() || undefined,
         color: '#147eba',
+        isShared: this.shareNewTheme,
       })
       .subscribe({
         next: (theme) => {
           this.newThemeName = '';
           this.newThemeDescription = '';
+          this.shareNewTheme = false;
           this.message.set('Tema criado. Agora voce pode enviar a planilha.');
           this.load();
           this.selectTheme(theme.id);
@@ -102,6 +107,10 @@ export class ThemesComponent implements OnInit {
     const themeId = this.selectedThemeId();
     if (!themeId) {
       this.error.set('Selecione um tema antes de enviar a planilha.');
+      return;
+    }
+    if (!this.selectedTheme()?.isOwner) {
+      this.error.set('Voce pode importar questoes somente em temas criados por voce.');
       return;
     }
     if (!this.selectedFile) {
@@ -141,8 +150,29 @@ export class ThemesComponent implements OnInit {
   startSelectedTheme() {
     const themeId = this.selectedThemeId();
     if (!themeId) return;
-    localStorage.setItem('activeThemeId', themeId);
+    this.auth.setActiveThemeId(themeId);
     void this.router.navigate(['/simulado']);
+  }
+
+  setSelectedSharing(isShared: boolean) {
+    const theme = this.selectedTheme();
+    if (!theme?.isOwner) return;
+
+    this.loading.set(true);
+    this.clearMessages();
+    this.api.updateThemeSharing(theme.id, isShared).subscribe({
+      next: (updated) => {
+        this.themes.update((themes) =>
+          themes.map((item) => (item.id === updated.id ? updated : item)),
+        );
+        this.message.set(isShared ? 'Tema compartilhado.' : 'Tema privado.');
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.message || 'Nao foi possivel alterar o compartilhamento.');
+        this.loading.set(false);
+      },
+    });
   }
 
   private clearMessages() {

@@ -14,6 +14,9 @@ export interface StudyTheme {
   description: string | null;
   color: string | null;
   sourceType: string;
+  ownerUserId: string;
+  isShared: boolean;
+  isOwner: boolean;
   questionCount: number;
   createdAt: string;
   updatedAt: string;

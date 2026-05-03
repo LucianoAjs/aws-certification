@@ -13,6 +13,7 @@ import {
   ProgressPayload,
   StudyTheme,
 } from '../../core/models/exam.models';
+import { AuthService } from '../../core/services/auth.service';
 import { ExamApiService } from '../../core/services/exam-api.service';
 
 @Component({
@@ -33,10 +34,11 @@ import { ExamApiService } from '../../core/services/exam-api.service';
 export class DashboardComponent implements OnInit {
   private readonly api = inject(ExamApiService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   readonly exam = signal<Exam | null>(null);
   readonly themes = signal<StudyTheme[]>([]);
-  readonly selectedThemeId = signal<string | null>(localStorage.getItem('activeThemeId'));
+  readonly selectedThemeId = signal<string | null>(this.auth.getActiveThemeId());
   readonly progress = signal<ProgressPayload | null>(null);
   readonly loading = signal(true);
 
@@ -150,7 +152,7 @@ export class DashboardComponent implements OnInit {
           null;
         this.selectedThemeId.set(selectedThemeId);
         if (selectedThemeId) {
-          localStorage.setItem('activeThemeId', selectedThemeId);
+          this.auth.setActiveThemeId(selectedThemeId);
         }
         this.loadExam(selectedThemeId);
       },
@@ -170,7 +172,7 @@ export class DashboardComponent implements OnInit {
 
   selectTheme(themeId: string) {
     this.selectedThemeId.set(themeId);
-    localStorage.setItem('activeThemeId', themeId);
+    this.auth.setActiveThemeId(themeId);
     this.loading.set(true);
     this.loadExam(themeId);
   }

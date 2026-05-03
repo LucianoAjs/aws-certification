@@ -22,8 +22,14 @@ export class ExamApiService {
     return this.http.get<StudyTheme[]>(`${this.apiUrl}/themes`);
   }
 
-  createTheme(input: { name: string; description?: string; color?: string }) {
+  createTheme(input: { name: string; description?: string; color?: string; isShared?: boolean }) {
     return this.http.post<StudyTheme>(`${this.apiUrl}/themes`, input);
+  }
+
+  updateThemeSharing(themeId: string, isShared: boolean) {
+    return this.http.patch<StudyTheme>(`${this.apiUrl}/themes/${themeId}/sharing`, {
+      isShared,
+    });
   }
 
   uploadQuestions(themeId: string, file: File, replace: boolean) {

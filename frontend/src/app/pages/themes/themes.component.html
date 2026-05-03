@@ -62,11 +62,14 @@
             <span class="theme-item__mark" [style.background]="theme.color || '#147eba'"></span>
             <span>
               <strong>{{ theme.name }}</strong>
-              <small>{{ theme.questionCount }} questões · {{ theme.sourceType }}</small>
+              <small>
+                {{ theme.questionCount }} questões ·
+                {{ theme.isOwner ? 'meu tema' : 'compartilhado' }}
+              </small>
             </span>
             <p-tag
-              [value]="selectedThemeId() === theme.id ? 'Ativo' : 'Tema'"
-              [severity]="selectedThemeId() === theme.id ? 'success' : 'info'"
+              [value]="selectedThemeId() === theme.id ? 'Ativo' : theme.isShared ? 'Compartilhado' : 'Privado'"
+              [severity]="selectedThemeId() === theme.id ? 'success' : theme.isShared ? 'warn' : 'info'"
             />
           </button>
         }
@@ -85,6 +88,20 @@
         <span>Tema selecionado</span>
         <strong>{{ selectedTheme()?.name || 'Nenhum tema selecionado' }}</strong>
         <small>{{ selectedTheme()?.description || 'Crie ou selecione um tema para importar.' }}</small>
+        @if (selectedTheme()) {
+          <label class="check-row">
+            <input
+              type="checkbox"
+              [checked]="selectedTheme()?.isShared"
+              [disabled]="!selectedTheme()?.isOwner || loading()"
+              (change)="setSelectedSharing($any($event.target).checked)"
+            />
+            Compartilhar este tema com outros usuarios
+          </label>
+          @if (!selectedTheme()?.isOwner) {
+            <small>Este tema foi compartilhado por {{ selectedTheme()?.ownerUserId }}.</small>
+          }
+        }
       </div>
 
       <div class="upload-box">
@@ -106,7 +123,7 @@
           icon="pi pi-upload"
           label="Enviar planilha"
           [loading]="loading()"
-          [disabled]="!selectedThemeId() || !selectedFile"
+          [disabled]="!selectedThemeId() || !selectedFile || !selectedTheme()?.isOwner"
           (onClick)="uploadQuestions()"
         />
       </div>
@@ -131,6 +148,10 @@
             />
           </label>
         </div>
+        <label class="check-row">
+          <input type="checkbox" [(ngModel)]="shareNewTheme" />
+          Compartilhar com outros usuarios
+        </label>
         <p-button
           icon="pi pi-plus"
           label="Criar tema"

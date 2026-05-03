@@ -16,7 +16,8 @@
 .topbar__left,
 .topbar__right,
 .brand,
-.topbar-chip {
+.topbar-chip,
+.user-chip {
   display: flex;
   align-items: center;
 }
@@ -79,6 +80,26 @@
   border-color: var(--app-orange);
 }
 
+.user-chip {
+  gap: 0.45rem;
+  min-width: 0;
+  min-height: 2rem;
+  max-width: min(18rem, 26vw);
+  padding: 0 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #dbe4f0;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 .topbar__menu-btn {
   display: none !important;
 
@@ -103,6 +124,11 @@
 
 @media (max-width: 520px) {
   .topbar__right {
+    gap: 0.35rem;
+  }
+
+  .user-chip,
+  .topbar-chip {
     display: none;
   }
 }

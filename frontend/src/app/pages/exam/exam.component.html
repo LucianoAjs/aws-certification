@@ -28,7 +28,8 @@
         >
           @for (theme of themes(); track theme.id) {
             <option [value]="theme.id">
-              {{ theme.name }} · {{ theme.questionCount }} questões
+              {{ theme.name }} · {{ theme.questionCount }} questões ·
+              {{ theme.isOwner ? 'meu' : 'compartilhado' }}
             </option>
           }
         </select>

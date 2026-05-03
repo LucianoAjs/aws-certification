@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aws-cert-trainer-postgres
+    environment:
+      POSTGRES_DB: aws_trainer
+      POSTGRES_USER: aws_trainer
+      POSTGRES_PASSWORD: aws_trainer
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aws_trainer -d aws_trainer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

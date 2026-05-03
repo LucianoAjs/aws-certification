@@ -3,34 +3,36 @@ import { AnswerRow, AttemptRow, ExamMode } from '../domain/exam.types';
 export abstract class AttemptRepository {
   abstract createAttempt(input: {
     id: string;
+    userId: string;
     themeId: string;
     mode: ExamMode;
     blockNumber: number | null;
     questionCount: number;
     timeLimitSeconds: number | null;
     startedAt: string;
-  }): AttemptRow;
-  abstract findAttempt(id: string): AttemptRow | null;
-  abstract listAttempts(): AttemptRow[];
-  abstract listAnswers(attemptId: string): AnswerRow[];
+  }): Promise<AttemptRow>;
+  abstract findAttempt(userId: string, id: string): Promise<AttemptRow | null>;
+  abstract listAttempts(userId: string): Promise<AttemptRow[]>;
+  abstract listAnswers(attemptId: string): Promise<AnswerRow[]>;
   abstract upsertAnswer(input: {
     attemptId: string;
     questionId: number;
     selectedOption: string;
     isMarked: boolean;
     answeredAt: string;
-  }): void;
+  }): Promise<void>;
   abstract markQuestion(input: {
     attemptId: string;
     questionId: number;
     isMarked: boolean;
     answeredAt: string;
-  }): void;
+  }): Promise<void>;
   abstract finishAttempt(input: {
+    userId: string;
     attemptId: string;
     finishedAt: string;
     score: number;
     correctCount: number;
-  }): AttemptRow | null;
-  abstract deleteAll(): void;
+  }): Promise<AttemptRow | null>;
+  abstract deleteAll(userId: string): Promise<void>;
 }

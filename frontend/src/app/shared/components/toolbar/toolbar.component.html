@@ -17,13 +17,25 @@
   </div>
 
   <div class="topbar__right">
+    <span class="user-chip">
+      <i class="pi pi-user"></i>
+      <span>{{ auth.currentUser()?.name || auth.currentUser()?.email }}</span>
+    </span>
     <span class="topbar-chip">
       <i class="pi pi-database"></i>
-      SQLite local
+      Postgres
     </span>
     <span class="topbar-chip topbar-chip--exam">
       <i class="pi pi-stopwatch"></i>
       Certification mode
     </span>
+    <p-button
+      icon="pi pi-sign-out"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+      ariaLabel="Sair"
+      (onClick)="logout()"
+    />
   </div>
 </header>
