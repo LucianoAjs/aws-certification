@@ -62,8 +62,8 @@
       <i class="pi pi-chart-line"></i>
     </article>
     <article class="metric app-card">
-      <span class="metric__label">Tentativas</span>
-      <strong>{{ progress()?.summary?.finishedAttempts || 0 }}</strong>
+      <span class="metric__label">Treinos de bloco</span>
+      <strong>{{ progress()?.summary?.finishedBlockAttempts || 0 }}</strong>
       <i class="pi pi-history"></i>
     </article>
     <article class="metric app-card">
@@ -78,7 +78,7 @@
       <div class="panel__header">
         <div>
           <h2 class="app-section-title">Histórico de Score</h2>
-          <p class="app-muted">Últimas 20 tentativas finalizadas.</p>
+          <p class="app-muted">Últimas 20 sessões finalizadas.</p>
         </div>
       </div>
       <div class="chart-box">
@@ -136,8 +136,10 @@
     <section class="app-card panel">
       <div class="panel__header">
         <div>
-          <h2 class="app-section-title">Últimas tentativas</h2>
-          <p class="app-muted">Histórico salvo no Postgres para o usuario logado.</p>
+          <h2 class="app-section-title">Últimas sessões</h2>
+          <p class="app-muted">
+            {{ progress()?.summary?.finishedBlockAttempts || 0 }} treinos de bloco finalizados.
+          </p>
         </div>
         <a routerLink="/tentativas" class="panel-link">Ver tudo</a>
       </div>

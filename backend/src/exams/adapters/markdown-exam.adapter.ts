@@ -3,6 +3,15 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ImportedQuestion } from '../domain/exam.types';
 
+interface MarkdownTheme {
+  id: string;
+  name: string;
+  description: string;
+  sourceFile: string;
+  color: string;
+  questions: ImportedQuestion[];
+}
+
 @Injectable()
 export class MarkdownExamAdapter {
   private readonly projectRoot = resolve(__dirname, '..', '..', '..', '..');
@@ -15,9 +24,47 @@ export class MarkdownExamAdapter {
     );
 
   parseDefaultTheme() {
-    const raw = readFileSync(this.examFilePath, 'utf8');
+    return this.parseTheme({
+      id: 'aws-iam-security-basic-60',
+      filePath: this.examFilePath,
+      description: 'Simulado base importado do markdown local.',
+      color: '#ff9900',
+    });
+  }
+
+  parseDefaultThemes(): MarkdownTheme[] {
+    if (process.env.EXAM_MARKDOWN) {
+      return [this.parseDefaultTheme()];
+    }
+
+    return [
+      this.parseDefaultTheme(),
+      this.parseTheme({
+        id: 'aws-ec2-fundamentals-85',
+        filePath: join(
+          this.projectRoot,
+          'aws-study',
+          'aws-ec2-fundamentals-timed-exam-85.md',
+        ),
+        description:
+          'Simulado cronometrado de EC2 Fundamentals importado do markdown local.',
+        color: '#ec7211',
+      }),
+    ];
+  }
+
+  private parseTheme(input: {
+    id: string;
+    filePath: string;
+    description: string;
+    color: string;
+  }): MarkdownTheme {
+    const raw = readFileSync(input.filePath, 'utf8');
     const title =
       raw.match(/^#\s+(.+)$/m)?.[1]?.trim() ?? 'AWS Certification Trainer';
+    const blockTimeLimitMinutes = Number(
+      raw.match(/Tempo sugerido:\s*(\d+)\s+minutos por bloco/i)?.[1] ?? 40,
+    );
     const [questionArea, answerArea = ''] = raw.split('## Gabarito comentado');
     const answerMap = new Map<number, { correctOption: string; explanation: string }>();
 
@@ -71,7 +118,7 @@ export class MarkdownExamAdapter {
         questions.push({
           blockNumber,
           blockTitle,
-          blockTimeLimitMinutes: 40,
+          blockTimeLimitMinutes,
           prompt: promptLines.join('\n\n'),
           optionA: options.get('A') ?? '',
           optionB: options.get('B') ?? '',
@@ -85,10 +132,11 @@ export class MarkdownExamAdapter {
     });
 
     return {
-      id: 'aws-iam-security-basic-60',
+      id: input.id,
       name: title,
-      description: 'Simulado base importado do markdown local.',
-      sourceFile: this.examFilePath,
+      description: input.description,
+      sourceFile: input.filePath,
+      color: input.color,
       questions,
     };
   }

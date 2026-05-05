@@ -92,6 +92,14 @@ export class ExamApiService {
     return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/finish`, {});
   }
 
+  pauseAttempt(id: string) {
+    return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/pause`, {});
+  }
+
+  resumeAttempt(id: string) {
+    return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/resume`, {});
+  }
+
   resetProgress() {
     return this.http.delete<void>(`${this.apiUrl}/progress`);
   }

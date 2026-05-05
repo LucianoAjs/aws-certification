@@ -40,6 +40,7 @@ export class AttemptService {
         ? block!.timeLimitMinutes
         : exam.fullExamTimeLimitMinutes) * 60;
 
+    const startedAt = new Date().toISOString();
     const attempt = await this.attemptRepository.createAttempt({
       id: randomUUID(),
       userId,
@@ -48,14 +49,15 @@ export class AttemptService {
       blockNumber: dto.mode === 'block' ? block!.number : null,
       questionCount,
       timeLimitSeconds,
-      startedAt: new Date().toISOString(),
+      startedAt,
+      timerStartedAt: startedAt,
     });
 
     return this.attemptPayload(attempt);
   }
 
   async getAttempt(userId: string, id: string) {
-    return this.attemptPayload(await this.requireAttempt(userId, id));
+    return this.attemptPayload(await this.resumeAttemptRow(await this.requireAttempt(userId, id)));
   }
 
   async reviewAttempt(userId: string, id: string) {
@@ -103,6 +105,29 @@ export class AttemptService {
     return this.attemptPayload(await this.finishAttemptRow(await this.requireAttempt(userId, id)), true);
   }
 
+  async pauseAttempt(userId: string, id: string) {
+    const attempt = await this.ensureAttemptFresh(await this.requireAttempt(userId, id));
+    if (attempt.status === 'finished') {
+      return this.attemptPayload(attempt, true);
+    }
+
+    const paused = await this.attemptRepository.pauseAttempt({
+      userId,
+      attemptId: id,
+      pausedAt: new Date().toISOString(),
+    });
+
+    if (!paused) {
+      throw new NotFoundException('Tentativa nao encontrada.');
+    }
+
+    return this.attemptPayload(paused);
+  }
+
+  async resumeAttempt(userId: string, id: string) {
+    return this.attemptPayload(await this.resumeAttemptRow(await this.requireAttempt(userId, id)));
+  }
+
   async ensureAttemptFresh(attempt: AttemptRow): Promise<AttemptRow> {
     if (
       attempt.status === 'in_progress' &&
@@ -129,6 +154,7 @@ export class AttemptService {
       answeredCount: fresh.answeredCount ?? (await this.answeredCount(fresh.id)),
       timeLimitSeconds: fresh.timeLimitSeconds,
       timeRemainingSeconds: this.secondsRemaining(fresh),
+      isTimerPaused: this.isTimerPaused(fresh),
       startedAt: fresh.startedAt,
       finishedAt: fresh.finishedAt,
       score: fresh.score,
@@ -162,6 +188,7 @@ export class AttemptService {
       questionCount: fresh.questionCount,
       timeLimitSeconds: fresh.timeLimitSeconds,
       timeRemainingSeconds: this.secondsRemaining(fresh),
+      isTimerPaused: this.isTimerPaused(fresh),
       startedAt: fresh.startedAt,
       finishedAt: fresh.finishedAt,
       score: fresh.score,
@@ -237,6 +264,23 @@ export class AttemptService {
     return finished;
   }
 
+  private async resumeAttemptRow(attempt: AttemptRow): Promise<AttemptRow> {
+    const fresh = await this.ensureAttemptFresh(attempt);
+    if (fresh.status === 'finished' || fresh.timerStartedAt) return fresh;
+
+    const resumed = await this.attemptRepository.resumeAttempt({
+      userId: fresh.userId,
+      attemptId: fresh.id,
+      resumedAt: new Date().toISOString(),
+    });
+
+    if (!resumed) {
+      throw new NotFoundException('Tentativa nao encontrada.');
+    }
+
+    return this.ensureAttemptFresh(resumed);
+  }
+
   private async assertQuestionInAttempt(attempt: AttemptRow, questionId: number) {
     const questions = await this.examRepository.findQuestionsForAttempt({
       themeId: attempt.examId,
@@ -270,9 +314,25 @@ export class AttemptService {
       return null;
     }
 
-    const startedAt = new Date(attempt.startedAt).getTime();
-    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const elapsed = this.secondsElapsed(attempt);
     return Math.max(0, attempt.timeLimitSeconds - elapsed);
+  }
+
+  private secondsElapsed(attempt: AttemptRow): number {
+    const elapsedBeforeCurrentRun = Math.max(0, attempt.elapsedSeconds);
+    if (attempt.status !== 'in_progress' || !attempt.timerStartedAt) {
+      return elapsedBeforeCurrentRun;
+    }
+
+    const elapsedCurrentRun = Math.max(
+      0,
+      Math.floor((Date.now() - new Date(attempt.timerStartedAt).getTime()) / 1000),
+    );
+    return elapsedBeforeCurrentRun + elapsedCurrentRun;
+  }
+
+  private isTimerPaused(attempt: AttemptRow): boolean {
+    return attempt.status === 'in_progress' && !attempt.timerStartedAt;
   }
 
   private async answeredCount(attemptId: string): Promise<number> {

@@ -29,7 +29,7 @@ export class PrismaExamRepository extends ExamRepository {
   }
 
   async ensureDefaultTheme(): Promise<void> {
-    const defaultTheme = this.markdownAdapter.parseDefaultTheme();
+    const defaultThemes = this.markdownAdapter.parseDefaultThemes();
     await this.prisma.user.upsert({
       where: { id: SYSTEM_USER_ID },
       update: {},
@@ -41,35 +41,37 @@ export class PrismaExamRepository extends ExamRepository {
       },
     });
 
-    const theme = await this.prisma.theme.findUnique({
-      where: { id: defaultTheme.id },
-      include: { _count: { select: { questions: true } } },
-    });
-
-    if (!theme) {
-      await this.prisma.theme.create({
-        data: {
-          id: defaultTheme.id,
-          ownerUserId: SYSTEM_USER_ID,
-          name: defaultTheme.name,
-          description: defaultTheme.description,
-          color: '#ff9900',
-          sourceType: 'markdown',
-          isShared: true,
-        },
-      });
-    } else if (theme.sourceType === 'markdown') {
-      await this.prisma.theme.update({
+    for (const defaultTheme of defaultThemes) {
+      const theme = await this.prisma.theme.findUnique({
         where: { id: defaultTheme.id },
-        data: {
-          ownerUserId: SYSTEM_USER_ID,
-          isShared: true,
-        },
+        include: { _count: { select: { questions: true } } },
       });
-    }
 
-    if (theme?._count.questions) return;
-    await this.replaceQuestions(SYSTEM_USER_ID, defaultTheme.id, defaultTheme.questions);
+      if (!theme) {
+        await this.prisma.theme.create({
+          data: {
+            id: defaultTheme.id,
+            ownerUserId: SYSTEM_USER_ID,
+            name: defaultTheme.name,
+            description: defaultTheme.description,
+            color: defaultTheme.color,
+            sourceType: 'markdown',
+            isShared: true,
+          },
+        });
+      } else if (theme.sourceType === 'markdown') {
+        await this.prisma.theme.update({
+          where: { id: defaultTheme.id },
+          data: {
+            ownerUserId: SYSTEM_USER_ID,
+            isShared: true,
+          },
+        });
+      }
+
+      if (theme?._count.questions) continue;
+      await this.replaceQuestions(SYSTEM_USER_ID, defaultTheme.id, defaultTheme.questions);
+    }
   }
 
   async listThemes(userId: string): Promise<Theme[]> {

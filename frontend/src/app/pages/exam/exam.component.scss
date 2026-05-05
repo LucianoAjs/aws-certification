@@ -205,6 +205,11 @@
     color: var(--app-green);
     background: var(--app-green-soft);
   }
+
+  &--paused {
+    color: var(--app-text-muted);
+    background: var(--app-panel-soft);
+  }
 }
 
 .progress-strip {
@@ -232,6 +237,29 @@
 
   @media (min-width: 980px) {
     grid-template-columns: 260px minmax(0, 1fr);
+  }
+}
+
+.paused-panel {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+
+  i {
+    color: var(--app-blue);
+    font-size: 2rem;
+  }
+
+  strong {
+    font-size: 1.15rem;
+  }
+
+  span {
+    max-width: 32rem;
+    color: var(--app-text-muted);
+    line-height: 1.5;
   }
 }
 

@@ -53,6 +53,7 @@ export class ExamComponent implements OnInit, OnDestroy {
   readonly timeRemainingSeconds = signal<number | null>(null);
 
   private timerId: ReturnType<typeof setInterval> | null = null;
+  private readonly pauseOnPageExit = () => this.pauseAttemptBeforeLeaving();
 
   readonly currentQuestion = computed(() => {
     const attempt = this.attempt();
@@ -66,6 +67,7 @@ export class ExamComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    window.addEventListener('pagehide', this.pauseOnPageExit);
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const attemptId = params.get('id');
       this.bootstrap(attemptId);
@@ -73,6 +75,8 @@ export class ExamComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    window.removeEventListener('pagehide', this.pauseOnPageExit);
+    this.pauseAttemptBeforeLeaving();
     this.stopTimer();
   }
 
@@ -178,7 +182,7 @@ export class ExamComponent implements OnInit, OnDestroy {
 
   saveAnswer(question: ExamQuestion, selectedOption: string) {
     const attempt = this.attempt();
-    if (!attempt || attempt.status !== 'in_progress') return;
+    if (!attempt || attempt.status !== 'in_progress' || attempt.isTimerPaused) return;
 
     this.savingQuestionId.set(question.id);
     this.api
@@ -197,7 +201,7 @@ export class ExamComponent implements OnInit, OnDestroy {
 
   toggleMark(question: ExamQuestion) {
     const attempt = this.attempt();
-    if (!attempt || attempt.status !== 'in_progress') return;
+    if (!attempt || attempt.status !== 'in_progress' || attempt.isTimerPaused) return;
 
     this.api.markQuestion(attempt.id, question.id, question.isMarked !== true).subscribe({
       next: (updated) => this.mergeAttempt(updated),
@@ -205,12 +209,13 @@ export class ExamComponent implements OnInit, OnDestroy {
     });
   }
 
-  finishAttempt() {
+  finishAttempt(confirmBeforeFinish = true) {
     const attempt = this.attempt();
     if (!attempt) return;
 
     const shouldFinish =
       attempt.status === 'finished' ||
+      !confirmBeforeFinish ||
       confirm('Finalizar tentativa e abrir o gabarito comentado?');
     if (!shouldFinish) return;
 
@@ -224,6 +229,26 @@ export class ExamComponent implements OnInit, OnDestroy {
         this.errorMessage.set('Nao foi possivel finalizar a tentativa.');
         this.loading.set(false);
       },
+    });
+  }
+
+  pauseAttempt() {
+    const attempt = this.attempt();
+    if (!attempt || attempt.status !== 'in_progress' || attempt.isTimerPaused) return;
+
+    this.api.pauseAttempt(attempt.id).subscribe({
+      next: (updated) => this.mergeAttempt(updated),
+      error: () => this.errorMessage.set('Nao consegui pausar a tentativa.'),
+    });
+  }
+
+  resumeAttempt() {
+    const attempt = this.attempt();
+    if (!attempt || attempt.status !== 'in_progress' || !attempt.isTimerPaused) return;
+
+    this.api.resumeAttempt(attempt.id).subscribe({
+      next: (updated) => this.mergeAttempt(updated),
+      error: () => this.errorMessage.set('Nao consegui retomar a tentativa.'),
     });
   }
 
@@ -291,7 +316,12 @@ export class ExamComponent implements OnInit, OnDestroy {
     this.stopTimer();
     this.timeRemainingSeconds.set(attempt?.timeRemainingSeconds ?? null);
 
-    if (!attempt || attempt.status !== 'in_progress' || attempt.timeRemainingSeconds === null) {
+    if (
+      !attempt ||
+      attempt.status !== 'in_progress' ||
+      attempt.isTimerPaused ||
+      attempt.timeRemainingSeconds === null
+    ) {
       return;
     }
 
@@ -300,7 +330,7 @@ export class ExamComponent implements OnInit, OnDestroy {
       this.timeRemainingSeconds.set(next);
       if (next === 0) {
         this.stopTimer();
-        this.finishAttempt();
+        this.finishAttempt(false);
       }
     }, 1000);
   }
@@ -309,5 +339,24 @@ export class ExamComponent implements OnInit, OnDestroy {
     if (!this.timerId) return;
     clearInterval(this.timerId);
     this.timerId = null;
+  }
+
+  private pauseAttemptBeforeLeaving() {
+    const attempt = this.attempt();
+    if (!attempt || attempt.status !== 'in_progress' || attempt.isTimerPaused) return;
+
+    this.stopTimer();
+    const token = this.auth.token();
+    if (!token) return;
+
+    void fetch(`/api/attempts/${attempt.id}/pause`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
+    });
   }
 }

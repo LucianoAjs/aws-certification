@@ -18,6 +18,8 @@ export class ProgressService {
       ),
     );
     const finished = attempts.filter((attempt) => attempt.status === 'finished');
+    const finishedFullAttempts = finished.filter((attempt) => attempt.mode === 'full');
+    const finishedBlockAttempts = finished.filter((attempt) => attempt.mode === 'block');
     const activeAttempt =
       attempts.find((attempt) => attempt.status === 'in_progress') ?? null;
     const averageScore = finished.length
@@ -63,6 +65,8 @@ export class ProgressService {
       summary: {
         totalAttempts: attempts.length,
         finishedAttempts: finished.length,
+        finishedFullAttempts: finishedFullAttempts.length,
+        finishedBlockAttempts: finishedBlockAttempts.length,
         activeAttempt,
         bestScore: finished.reduce(
           (best, attempt) => Math.max(best, attempt.score),

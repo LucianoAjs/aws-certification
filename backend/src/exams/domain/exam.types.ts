@@ -73,6 +73,8 @@ export interface AttemptRow {
   blockNumber: number | null;
   questionCount: number;
   timeLimitSeconds: number | null;
+  elapsedSeconds: number;
+  timerStartedAt: string | null;
   startedAt: string;
   finishedAt: string | null;
   status: AttemptStatus;

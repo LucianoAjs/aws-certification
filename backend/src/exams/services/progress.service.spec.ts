@@ -47,6 +47,7 @@ describe('ProgressService', () => {
       {
         id: '1',
         status: 'finished',
+        mode: 'block',
         score: 80,
         finishedAt: '2026-05-01T10:00:00Z',
         examId: 'aws-iam',
@@ -70,6 +71,8 @@ describe('ProgressService', () => {
     const result = (await service.getProgress('local-user')) as any;
 
     expect(result.summary).toBeDefined();
+    expect(result.summary.finishedFullAttempts).toBe(0);
+    expect(result.summary.finishedBlockAttempts).toBe(1);
     expect(result.chartData).toBeDefined();
     expect(result.chartData.scoreHistory).toContainEqual({
       date: '2026-05-01',

@@ -101,9 +101,13 @@
 
         <div class="exam-top__stats">
           @if (attemptState.status === 'in_progress') {
-            <div class="timer" [class.timer--low]="(timeRemainingSeconds() ?? 9999) < 300">
-              <i class="pi pi-clock"></i>
-              {{ formatSeconds(timeRemainingSeconds()) }}
+            <div
+              class="timer"
+              [class.timer--low]="!attemptState.isTimerPaused && (timeRemainingSeconds() ?? 9999) < 300"
+              [class.timer--paused]="attemptState.isTimerPaused"
+            >
+              <i [class]="attemptState.isTimerPaused ? 'pi pi-pause-circle' : 'pi pi-clock'"></i>
+              {{ attemptState.isTimerPaused ? 'Pausado' : formatSeconds(timeRemainingSeconds()) }}
             </div>
           } @else {
             <div class="timer timer--done">
@@ -125,6 +129,22 @@
             (onClick)="newAttempt()"
           />
           @if (attemptState.status === 'in_progress') {
+            @if (attemptState.isTimerPaused) {
+              <p-button
+                icon="pi pi-play"
+                label="Continuar"
+                severity="success"
+                (onClick)="resumeAttempt()"
+              />
+            } @else {
+              <p-button
+                icon="pi pi-pause"
+                label="Pausar"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="pauseAttempt()"
+              />
+            }
             <p-button
               icon="pi pi-check-circle"
               label="Finalizar"
@@ -141,7 +161,20 @@
         <strong>{{ answeredPercent() }}%</strong>
       </div>
 
-      <div class="exam-layout">
+      @if (attemptState.status === 'in_progress' && attemptState.isTimerPaused) {
+        <div class="paused-panel app-card">
+          <i class="pi pi-pause-circle"></i>
+          <strong>Tentativa pausada</strong>
+          <span>O cronometro esta parado. Continue quando estiver pronto para responder.</span>
+          <p-button
+            icon="pi pi-play"
+            label="Continuar"
+            severity="success"
+            (onClick)="resumeAttempt()"
+          />
+        </div>
+      } @else {
+        <div class="exam-layout">
         <aside class="question-map app-card">
           <h2 class="app-section-title">Questões</h2>
           <div class="question-map__grid">
@@ -238,7 +271,8 @@
             </div>
           </article>
         }
-      </div>
+        </div>
+      }
     }
   }
 </section>

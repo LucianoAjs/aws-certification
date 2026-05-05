@@ -61,6 +61,7 @@ export interface AttemptState {
   questionCount: number;
   timeLimitSeconds: number | null;
   timeRemainingSeconds: number | null;
+  isTimerPaused: boolean;
   startedAt: string;
   finishedAt: string | null;
   score: number;
@@ -80,6 +81,7 @@ export interface AttemptListItem {
   answeredCount: number;
   timeLimitSeconds: number | null;
   timeRemainingSeconds: number | null;
+  isTimerPaused: boolean;
   startedAt: string;
   finishedAt: string | null;
   score: number;
@@ -89,6 +91,8 @@ export interface AttemptListItem {
 export interface ProgressSummary {
   totalAttempts: number;
   finishedAttempts: number;
+  finishedFullAttempts: number;
+  finishedBlockAttempts: number;
   activeAttempt: AttemptListItem | null;
   bestScore: number;
   averageScore: number;

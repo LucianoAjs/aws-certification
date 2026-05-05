@@ -10,6 +10,7 @@ export abstract class AttemptRepository {
     questionCount: number;
     timeLimitSeconds: number | null;
     startedAt: string;
+    timerStartedAt: string | null;
   }): Promise<AttemptRow>;
   abstract findAttempt(userId: string, id: string): Promise<AttemptRow | null>;
   abstract listAttempts(userId: string): Promise<AttemptRow[]>;
@@ -33,6 +34,16 @@ export abstract class AttemptRepository {
     finishedAt: string;
     score: number;
     correctCount: number;
+  }): Promise<AttemptRow | null>;
+  abstract pauseAttempt(input: {
+    userId: string;
+    attemptId: string;
+    pausedAt: string;
+  }): Promise<AttemptRow | null>;
+  abstract resumeAttempt(input: {
+    userId: string;
+    attemptId: string;
+    resumedAt: string;
   }): Promise<AttemptRow | null>;
   abstract deleteAll(userId: string): Promise<void>;
 }

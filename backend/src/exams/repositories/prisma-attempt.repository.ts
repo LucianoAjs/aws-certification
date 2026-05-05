@@ -32,6 +32,7 @@ export class PrismaAttemptRepository extends AttemptRepository {
     questionCount: number;
     timeLimitSeconds: number | null;
     startedAt: string;
+    timerStartedAt: string | null;
   }): Promise<AttemptRow> {
     const attempt = await this.prisma.attempt.create({
       data: {
@@ -42,6 +43,8 @@ export class PrismaAttemptRepository extends AttemptRepository {
         blockNumber: input.blockNumber,
         questionCount: input.questionCount,
         timeLimitSeconds: input.timeLimitSeconds,
+        elapsedSeconds: 0,
+        timerStartedAt: input.timerStartedAt ? new Date(input.timerStartedAt) : null,
         startedAt: new Date(input.startedAt),
       },
       include: this.attemptInclude(),
@@ -146,9 +149,58 @@ export class PrismaAttemptRepository extends AttemptRepository {
       data: {
         status: 'finished',
         finishedAt: new Date(input.finishedAt),
+        timerStartedAt: null,
         score: input.score,
         correctCount: input.correctCount,
       },
+    });
+
+    return this.findAttempt(input.userId, input.attemptId);
+  }
+
+  async pauseAttempt(input: {
+    userId: string;
+    attemptId: string;
+    pausedAt: string;
+  }): Promise<AttemptRow | null> {
+    const attempt = await this.findAttempt(input.userId, input.attemptId);
+    if (!attempt || attempt.status === 'finished' || !attempt.timerStartedAt) {
+      return attempt;
+    }
+
+    const elapsedSinceResume = Math.max(
+      0,
+      Math.floor(
+        (new Date(input.pausedAt).getTime() -
+          new Date(attempt.timerStartedAt).getTime()) /
+          1000,
+      ),
+    );
+
+    await this.prisma.attempt.updateMany({
+      where: { id: input.attemptId, userId: input.userId, status: 'in_progress' },
+      data: {
+        elapsedSeconds: attempt.elapsedSeconds + elapsedSinceResume,
+        timerStartedAt: null,
+      },
+    });
+
+    return this.findAttempt(input.userId, input.attemptId);
+  }
+
+  async resumeAttempt(input: {
+    userId: string;
+    attemptId: string;
+    resumedAt: string;
+  }): Promise<AttemptRow | null> {
+    const attempt = await this.findAttempt(input.userId, input.attemptId);
+    if (!attempt || attempt.status === 'finished' || attempt.timerStartedAt) {
+      return attempt;
+    }
+
+    await this.prisma.attempt.updateMany({
+      where: { id: input.attemptId, userId: input.userId, status: 'in_progress' },
+      data: { timerStartedAt: new Date(input.resumedAt) },
     });
 
     return this.findAttempt(input.userId, input.attemptId);
@@ -181,6 +233,8 @@ export class PrismaAttemptRepository extends AttemptRepository {
       blockNumber: row.blockNumber,
       questionCount: row.questionCount,
       timeLimitSeconds: row.timeLimitSeconds,
+      elapsedSeconds: row.elapsedSeconds,
+      timerStartedAt: row.timerStartedAt?.toISOString() ?? null,
       startedAt: row.startedAt.toISOString(),
       finishedAt: row.finishedAt?.toISOString() ?? null,
       status: row.status === 'finished' ? 'finished' : 'in_progress',

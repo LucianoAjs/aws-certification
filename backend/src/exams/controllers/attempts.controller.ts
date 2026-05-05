@@ -51,4 +51,14 @@ export class AttemptsController {
   finishAttempt(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.attemptService.finishAttempt(user.id, id);
   }
+
+  @Post(':id/pause')
+  pauseAttempt(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.attemptService.pauseAttempt(user.id, id);
+  }
+
+  @Post(':id/resume')
+  resumeAttempt(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.attemptService.resumeAttempt(user.id, id);
+  }
 }

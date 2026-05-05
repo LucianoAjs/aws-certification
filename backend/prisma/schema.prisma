@@ -81,6 +81,8 @@ model Attempt {
   blockNumber      Int?
   questionCount    Int
   timeLimitSeconds Int?
+  elapsedSeconds   Int      @default(0)
+  timerStartedAt   DateTime?
   startedAt        DateTime
   finishedAt       DateTime?
   status           String   @default("in_progress")
