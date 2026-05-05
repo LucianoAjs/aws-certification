@@ -7,27 +7,28 @@ import {
   ProgressPayload,
   StudyTheme,
 } from '../models/exam.models';
+import { RuntimeConfigService } from './runtime-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class ExamApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api';
+  private readonly runtimeConfig = inject(RuntimeConfigService);
 
   getExam(themeId?: string | null) {
     const options = themeId ? { params: { themeId } } : undefined;
-    return this.http.get<Exam>(`${this.apiUrl}/exam`, options);
+    return this.http.get<Exam>(this.apiUrl('/exam'), options);
   }
 
   getThemes() {
-    return this.http.get<StudyTheme[]>(`${this.apiUrl}/themes`);
+    return this.http.get<StudyTheme[]>(this.apiUrl('/themes'));
   }
 
   createTheme(input: { name: string; description?: string; color?: string; isShared?: boolean }) {
-    return this.http.post<StudyTheme>(`${this.apiUrl}/themes`, input);
+    return this.http.post<StudyTheme>(this.apiUrl('/themes'), input);
   }
 
   updateThemeSharing(themeId: string, isShared: boolean) {
-    return this.http.patch<StudyTheme>(`${this.apiUrl}/themes/${themeId}/sharing`, {
+    return this.http.patch<StudyTheme>(this.apiUrl(`/themes/${themeId}/sharing`), {
       isShared,
     });
   }
@@ -40,21 +41,21 @@ export class ExamApiService {
       theme: StudyTheme;
       importedQuestions: number;
       mode: 'replace' | 'append';
-    }>(`${this.apiUrl}/themes/${themeId}/upload`, formData);
+    }>(this.apiUrl(`/themes/${themeId}/upload`), formData);
   }
 
   downloadTemplate() {
-    return this.http.get(`${this.apiUrl}/import-template`, {
+    return this.http.get(this.apiUrl('/import-template'), {
       responseType: 'blob',
     });
   }
 
   getProgress() {
-    return this.http.get<ProgressPayload>(`${this.apiUrl}/progress`);
+    return this.http.get<ProgressPayload>(this.apiUrl('/progress'));
   }
 
   createAttempt(mode: ExamMode, blockNumber?: number, themeId?: string | null) {
-    return this.http.post<AttemptState>(`${this.apiUrl}/attempts`, {
+    return this.http.post<AttemptState>(this.apiUrl('/attempts'), {
       mode,
       blockNumber,
       themeId,
@@ -62,11 +63,11 @@ export class ExamApiService {
   }
 
   getAttempt(id: string) {
-    return this.http.get<AttemptState>(`${this.apiUrl}/attempts/${id}`);
+    return this.http.get<AttemptState>(this.apiUrl(`/attempts/${id}`));
   }
 
   reviewAttempt(id: string) {
-    return this.http.get<AttemptState>(`${this.apiUrl}/attempts/${id}/review`);
+    return this.http.get<AttemptState>(this.apiUrl(`/attempts/${id}/review`));
   }
 
   saveAnswer(
@@ -76,31 +77,35 @@ export class ExamApiService {
     isMarked: boolean,
   ) {
     return this.http.patch<AttemptState>(
-      `${this.apiUrl}/attempts/${attemptId}/answers/${questionId}`,
+      this.apiUrl(`/attempts/${attemptId}/answers/${questionId}`),
       { selectedOption, isMarked },
     );
   }
 
   markQuestion(attemptId: string, questionId: number, isMarked: boolean) {
     return this.http.patch<AttemptState>(
-      `${this.apiUrl}/attempts/${attemptId}/answers/${questionId}/mark`,
+      this.apiUrl(`/attempts/${attemptId}/answers/${questionId}/mark`),
       { isMarked },
     );
   }
 
   finishAttempt(id: string) {
-    return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/finish`, {});
+    return this.http.post<AttemptState>(this.apiUrl(`/attempts/${id}/finish`), {});
   }
 
   pauseAttempt(id: string) {
-    return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/pause`, {});
+    return this.http.post<AttemptState>(this.apiUrl(`/attempts/${id}/pause`), {});
   }
 
   resumeAttempt(id: string) {
-    return this.http.post<AttemptState>(`${this.apiUrl}/attempts/${id}/resume`, {});
+    return this.http.post<AttemptState>(this.apiUrl(`/attempts/${id}/resume`), {});
   }
 
   resetProgress() {
-    return this.http.delete<void>(`${this.apiUrl}/progress`);
+    return this.http.delete<void>(this.apiUrl('/progress'));
+  }
+
+  private apiUrl(path: string) {
+    return this.runtimeConfig.apiUrl(`/api${path}`);
   }
 }

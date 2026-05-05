@@ -1,14 +1,22 @@
 node_modules/
 dist/
 .angular/
+.env
+.env.*
+!.env.example
 
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
 
 backend/node_modules/
+backend/.env
+backend/.env.*
+!backend/.env.example
 backend/data/*.sqlite
 backend/data/*.sqlite-shm
 backend/data/*.sqlite-wal
+
+supabase/.temp/
 
 .DS_Store
